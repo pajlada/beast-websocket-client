@@ -34,6 +34,8 @@ jobs:
           fetch-depth: 0 # allows for tags access
 
       - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)

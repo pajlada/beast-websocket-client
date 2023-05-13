@@ -33,6 +33,8 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # allows for tags access
 
+      - uses: actions/setup-python@v4
+
       # WINDOWS
       - name: Enable Developer Command Prompt (Windows)
         if: startsWith(matrix.os, 'windows')

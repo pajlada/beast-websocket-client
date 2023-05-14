@@ -1,5 +1,5 @@
 #include <boost/asio.hpp>
-#include <boost/asio/experimental/as_tuple.hpp>
+#include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -29,7 +29,7 @@ using namespace std::literals::chrono_literals;
 using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
 
 constexpr auto use_nothrow_awaitable =
-    boost::asio::experimental::as_tuple(boost::asio::use_awaitable);
+    boost::asio::as_tuple(boost::asio::use_awaitable);
 
 // Report a failure
 void fail(beast::error_code ec, char const *what)

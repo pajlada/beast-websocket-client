@@ -45,6 +45,7 @@ jobs:
       - name: Setup conan variables (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
+          "C2_USE_OPENSSL3=True" >> "$Env:GITHUB_ENV"
           "C2_CONAN_CACHE_SUFFIX=$(if ($Env:C2_BUILD_WITH_QT6 -eq "on") { "-QT6" } else { "`" })" >> "$Env:GITHUB_ENV"
         shell: powershell
 
@@ -93,7 +94,6 @@ jobs:
               -G"NMake Makefiles" `
               -DCMAKE_BUILD_TYPE=RelWithDebInfo `
               -DCMAKE_TOOLCHAIN_FILE="conan_toolchain.cmake" `
-              -DUSE_PRECOMPILED_HEADERS=OFF `
               ..
           set cl=/MP
           nmake /S /NOLOGO
@@ -114,9 +114,6 @@ jobs:
               rapidjson-dev \
               libfuse2 \
               libssl-dev \
-              libboost-dev \
-              libboost-system-dev \
-              libboost-filesystem-dev \
               libpulse-dev \
               libxkbcommon-x11-0 \
               build-essential \
@@ -127,6 +124,17 @@ jobs:
               libxcb-render-util0 \
               libxcb-xinerama0
 
+      # LINUX
+      - name: Install boost (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: MarkusJx/install-boost@v2.4.1
+        id: install-boost
+        with:
+          # REQUIRED: Specify the required boost version
+          # A list of supported versions can be found here:
+          # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+          boost_version: 1.81.0
+
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -135,11 +143,11 @@ jobs:
           CXXFLAGS=-fno-sized-deallocation cmake \
             -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
             -DCMAKE_BUILD_TYPE=Release \
-            -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-            -DUSE_PRECOMPILED_HEADERS=OFF \
             ..
           make -j"$(nproc)"
         shell: bash
+        env:
+          BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -157,7 +165,6 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
               -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-              -DUSE_PRECOMPILED_HEADERS=OFF \
               ..
           make -j"$(sysctl -n hw.logicalcpu)"
         shell: bash

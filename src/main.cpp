@@ -1,3 +1,6 @@
+#include "messages/metadata.hpp"
+#include "messages/session-welcome.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -5,18 +8,20 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+#include <boost/json.hpp>
 
 #include <array>
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 
 namespace beast = boost::beast;          // from <boost/beast.hpp>
 namespace http = beast::http;            // from <boost/beast/http.hpp>
 namespace websocket = beast::websocket;  // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;             // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
-                                         //
+
 using boost::asio::awaitable;
 using boost::asio::buffer;
 using boost::asio::co_spawn;
@@ -31,27 +36,49 @@ using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
 constexpr auto use_nothrow_awaitable =
     boost::asio::as_tuple(boost::asio::use_awaitable);
 
+using boost::json::try_value_to_tag;
+using boost::json::value;
+using boost::json::value_to_tag;
+
 // Report a failure
 void fail(beast::error_code ec, char const *what)
 {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-struct proxy_state {
-    proxy_state(tcp::socket client)
-        : client(std::move(client))
-    {
-    }
-
-    tcp::socket client;
-    tcp::socket server{client.get_executor()};
-    steady_clock::time_point deadline;
-};
-
-using proxy_state_ptr = std::shared_ptr<proxy_state>;
-
 awaitable<void> sessionReader(WebSocketStream &ws)
 {
+    std::unordered_map<
+        std::string,
+        std::function<void(twitch::eventsub::Metadata, boost::json::value)>>
+        handlers{
+            {
+                "session_welcome",
+                [](const auto &metadata, const auto &jv) {
+                    std::cout << "SESSION WELCOME\n";
+                    auto result =
+                        try_value_to<twitch::eventsub::SessionWelcome>(jv);
+
+                    if (!result.has_value())
+                    {
+                        fail(result.error(), "parsing");
+                        return;
+                    }
+
+                    const auto &sessionWelcome = result.value();
+
+                    std::cout << "sessionWelcome id:" << sessionWelcome.id
+                              << "\n";
+                },
+            },
+            {
+                "session_keepalive",
+                [](const auto &metadata, const auto &jv) {
+                    std::cout << "Session keepalive\n";
+                },
+            },
+        };
+
     for (;;)
     {
         // This buffer will hold the incoming message
@@ -66,8 +93,58 @@ awaitable<void> sessionReader(WebSocketStream &ws)
             continue;
         }
 
-        std::cout << "read: " << beast::make_printable(buffer.data())
-                  << std::endl;
+        boost::json::error_code ec;
+        auto jv =
+            boost::json::parse(beast::buffers_to_string(buffer.data()), ec);
+        if (ec)
+        {
+            fail(ec, "parsing");
+            continue;
+        }
+
+        const auto *jvObject = jv.if_object();
+        if (jvObject == nullptr)
+        {
+            std::cerr << "root value was not a json object\n";
+            continue;
+        }
+
+        const auto *metadataV = jvObject->if_contains("metadata");
+        if (metadataV == nullptr)
+        {
+            std::cerr << "root value was missing the `metadata` key\n";
+            continue;
+        }
+        auto metadataResult =
+            try_value_to<twitch::eventsub::Metadata>(*metadataV);
+        if (metadataResult.has_error())
+        {
+            fail(metadataResult.error(), "parsing metadata");
+            continue;
+        }
+
+        const auto &metadata = metadataResult.value();
+
+        auto handler = handlers.find(metadata.messageType);
+
+        if (handler == handlers.end())
+        {
+            std::cout << "No handler found for " << metadata.messageType
+                      << "\n";
+
+            std::cout << "read: " << beast::make_printable(buffer.data())
+                      << std::endl;
+            continue;
+        }
+
+        const auto *payloadV = jvObject->if_contains("payload");
+        if (payloadV == nullptr)
+        {
+            std::cerr << "root value was missing the `payload` key\n";
+            continue;
+        }
+
+        handler->second(metadata, *payloadV);
     }
 }
 
@@ -112,75 +189,6 @@ awaitable<WebSocketStream> session(WebSocketStream &&ws)
     std::cout << "reader stopped\n";
 
     co_return ws;
-}
-
-awaitable<void> client_to_server(proxy_state_ptr state)
-{
-    std::array<char, 1024> data;
-
-    for (;;)
-    {
-        state->deadline = std::max(state->deadline, steady_clock::now() + 5s);
-
-        auto [e1, n1] = co_await state->client.async_read_some(
-            buffer(data), use_nothrow_awaitable);
-        if (e1)
-            co_return;
-
-        auto [e2, n2] = co_await async_write(state->server, buffer(data, n1),
-                                             use_nothrow_awaitable);
-        if (e2)
-            co_return;
-    }
-}
-
-awaitable<void> server_to_client(proxy_state_ptr state)
-{
-    std::array<char, 1024> data;
-
-    for (;;)
-    {
-        state->deadline = std::max(state->deadline, steady_clock::now() + 5s);
-
-        auto [e1, n1] = co_await state->server.async_read_some(
-            buffer(data), use_nothrow_awaitable);
-        if (e1)
-            co_return;
-
-        auto [e2, n2] = co_await async_write(state->client, buffer(data, n1),
-                                             use_nothrow_awaitable);
-        if (e2)
-            co_return;
-    }
-}
-
-awaitable<void> watchdog(proxy_state_ptr state)
-{
-    boost::asio::steady_timer timer(state->client.get_executor());
-
-    auto now = steady_clock::now();
-    while (state->deadline > now)
-    {
-        timer.expires_at(state->deadline);
-        co_await timer.async_wait(use_nothrow_awaitable);
-        now = steady_clock::now();
-    }
-}
-
-awaitable<void> proxy(tcp::socket client, tcp::endpoint target)
-{
-    auto state = std::make_shared<proxy_state>(std::move(client));
-
-    auto [e] =
-        co_await state->server.async_connect(target, use_nothrow_awaitable);
-    if (!e)
-    {
-        co_await (client_to_server(state) || server_to_client(state) ||
-                  watchdog(state));
-
-        state->client.close();
-        state->server.close();
-    }
 }
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,
@@ -290,12 +298,12 @@ int main(int argc, char **argv)
     {
         boost::asio::io_context ctx;
 
-        boost::asio::ssl::context sslContext{
-            boost::asio::ssl::context::tlsv12_client};
-
         const auto *const host = "localhost";
         const auto *const port = "3012";
         const auto *const path = "/ws";
+
+        boost::asio::ssl::context sslContext{
+            boost::asio::ssl::context::tlsv12_client};
 
         // TODO: Load certificates into SSL context
 

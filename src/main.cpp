@@ -1,5 +1,6 @@
 #include "messages/metadata.hpp"
-#include "messages/session-welcome.hpp"
+#include "payloads/channel-ban-v1.hpp"
+#include "payloads/session-welcome.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/as_tuple.hpp>
@@ -8,6 +9,7 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <boost/json.hpp>
 
 #include <array>
@@ -40,14 +42,56 @@ using boost::json::try_value_to_tag;
 using boost::json::value;
 using boost::json::value_to_tag;
 
+using namespace eventsub;
+
 // Report a failure
 void fail(beast::error_code ec, char const *what)
 {
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
+template <class T>
+std::optional<T> parsePayload(const boost::json::value &jv)
+{
+    auto result = try_value_to<T>(jv);
+    if (!result.has_value())
+    {
+        fail(result.error(), "parsing payload");
+        return std::nullopt;
+    }
+
+    return result.value();
+}
+
+// Subscription Type + Subscription Version
+using EventSubSubscription = std::pair<std::string, std::string>;
+
 awaitable<void> sessionReader(WebSocketStream &ws)
 {
+    std::unordered_map<
+        EventSubSubscription,
+        std::function<void(twitch::eventsub::Metadata, boost::json::value)>,
+        boost::hash<EventSubSubscription>>
+        notificationHandlers{
+            {
+                {"channel.ban", "1"},
+                [](const auto &metadata, const auto &jv) {
+                    std::cout << "channel.ban!!!\n";
+                    auto oPayload = parsePayload<
+                        eventsub::payload::channel_ban::v1::Payload>(jv);
+                    if (!oPayload)
+                    {
+                        std::cerr << "bad payload for channel.ban v1\n";
+                        return;
+                    }
+                    const auto &payload = *oPayload;
+
+                    std::cout << "channel.ban reason:" << payload.event.reason
+                              << "\n";
+                },
+            },
+        };
+
     std::unordered_map<
         std::string,
         std::function<void(twitch::eventsub::Metadata, boost::json::value)>>
@@ -56,25 +100,51 @@ awaitable<void> sessionReader(WebSocketStream &ws)
                 "session_welcome",
                 [](const auto &metadata, const auto &jv) {
                     std::cout << "SESSION WELCOME\n";
-                    auto result =
-                        try_value_to<twitch::eventsub::SessionWelcome>(jv);
 
-                    if (!result.has_value())
+                    auto oPayload =
+                        parsePayload<payload::session_welcome::Payload>(jv);
+                    if (!oPayload)
                     {
-                        fail(result.error(), "parsing");
+                        std::cerr << "bad payload for session welcome\n";
                         return;
                     }
+                    const auto &payload = *oPayload;
 
-                    const auto &sessionWelcome = result.value();
-
-                    std::cout << "sessionWelcome id:" << sessionWelcome.id
-                              << "\n";
+                    std::cout << "sessionWelcome id:" << payload.id << "\n";
                 },
             },
             {
                 "session_keepalive",
                 [](const auto &metadata, const auto &jv) {
                     std::cout << "Session keepalive\n";
+                },
+            },
+            {
+                "notification",
+                [&notificationHandlers](const auto &metadata, const auto &jv) {
+                    if (!metadata.subscriptionType ||
+                        !metadata.subscriptionVersion)
+                    {
+                        std::cerr << "missing subscriptionType or "
+                                     "subscriptionVersion\n";
+                        return;
+                    }
+
+                    std::cout << "Received notification for subscription "
+                              << *metadata.subscriptionType << ", version "
+                              << *metadata.subscriptionVersion << "\n";
+
+                    auto it = notificationHandlers.find(
+                        {*metadata.subscriptionType,
+                         *metadata.subscriptionVersion});
+                    if (it == notificationHandlers.end())
+                    {
+                        std::cerr << "No notification handler for "
+                                  << *metadata.subscriptionType << "\n";
+                        return;
+                    }
+
+                    it->second(metadata, jv);
                 },
             },
         };
@@ -136,6 +206,9 @@ awaitable<void> sessionReader(WebSocketStream &ws)
                       << std::endl;
             continue;
         }
+
+        std::cout << "read: " << beast::make_printable(buffer.data())
+                  << std::endl;
 
         const auto *payloadV = jvObject->if_contains("payload");
         if (payloadV == nullptr)

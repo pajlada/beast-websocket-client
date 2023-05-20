@@ -1,12 +1,13 @@
 #pragma once
 
+#include "helpers.hpp"
 #include "messages/errors.hpp"
 
 #include <boost/json.hpp>
 
 #include <string>
 
-namespace twitch::eventsub {
+namespace eventsub::payload::session_welcome {
 
 /*
 {
@@ -23,18 +24,12 @@ namespace twitch::eventsub {
 }
 */
 
-struct SessionWelcome {
+struct Payload {
     const std::string id;
-
-    SessionWelcome(std::string_view _id)
-        : id(_id)
-    {
-    }
 };
 
-boost::json::result_for<SessionWelcome, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<SessionWelcome>,
-    const boost::json::value &payloadV)
+boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<Payload>, const boost::json::value &payloadV)
 {
     if (!payloadV.is_object())
     {
@@ -47,27 +42,21 @@ boost::json::result_for<SessionWelcome, boost::json::value>::type tag_invoke(
     {
         return boost::system::error_code{129, error::MISSING_KEY};
     }
-    const auto *session = sessionV->if_object();
-    if (session == nullptr)
+    if (!sessionV->is_object())
     {
         return boost::system::error_code{129, error::EXPECTED_OBJECT};
     }
+    const auto &session = sessionV->get_object();
 
-    const auto *idV = session->if_contains("id");
-    if (idV == nullptr)
+    const auto id = readMember<std::string>(session, "id");
+    if (!id)
     {
         return boost::system::error_code{129, error::MISSING_KEY};
     }
 
-    const auto id = boost::json::try_value_to<std::string>(*idV);
-    if (id.has_error())
-    {
-        return id.error();
-    }
-
-    return SessionWelcome{
-        id.value(),
+    return Payload{
+        .id = *id,
     };
 }
 
-}  // namespace twitch::eventsub
+}  // namespace eventsub::payload::session_welcome

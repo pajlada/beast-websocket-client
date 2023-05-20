@@ -4,6 +4,7 @@
 
 #include <boost/json.hpp>
 
+#include <optional>
 #include <string>
 
 namespace twitch::eventsub {
@@ -14,6 +15,8 @@ namespace twitch::eventsub {
     "message_id": "40cc68b8-dc5b-a46e-0388-a7c9193eec5e",
     "message_type": "session_welcome",
     "message_timestamp": "2023-05-14T12:31:47.995298776Z"
+    "subscription_type": "channel.unban",  // only included on message_type=notification
+    "subscription_version": "1"  // only included on message_type=notification
   },
   "payload": ...
 }
@@ -25,13 +28,8 @@ struct Metadata {
     // TODO: should this be chronofied?
     const std::string messageTimestamp;
 
-    Metadata(std::string_view _messageID, std::string_view _messageType,
-             std::string_view _messageTimestamp)
-        : messageID(_messageID)
-        , messageType(_messageType)
-        , messageTimestamp(_messageTimestamp)
-    {
-    }
+    const std::optional<std::string> subscriptionType;
+    const std::optional<std::string> subscriptionVersion;
 };
 
 boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
@@ -78,10 +76,31 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         return messageTimestamp.error();
     }
 
+    std::optional<std::string> subscriptionType;
+    if (const auto *const it = root.find("subscription_type"); it != root.end())
+    {
+        if (const auto *v = it->value().if_string(); v != nullptr)
+        {
+            subscriptionType = *v;
+        }
+    }
+
+    std::optional<std::string> subscriptionVersion;
+    if (const auto *const it = root.find("subscription_version");
+        it != root.end())
+    {
+        if (const auto *v = it->value().if_string(); v != nullptr)
+        {
+            subscriptionVersion = *v;
+        }
+    }
+
     return Metadata{
-        messageID.value(),
-        messageType.value(),
-        messageTimestamp.value(),
+        .messageID = messageID.value(),
+        .messageType = messageType.value(),
+        .messageTimestamp = messageTimestamp.value(),
+        .subscriptionType = subscriptionType,
+        .subscriptionVersion = subscriptionVersion,
     };
 }
 

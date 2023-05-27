@@ -1,0 +1,1 @@
+{ "directory": "/home/pajlada/git/beast-websocket-client/ast", "file": "test.cpp", "output": "/tmp/test-c11d28.o", "arguments": ["/usr/bin/clang-15", "-xc++", "test.cpp", "-o", "/tmp/test-c11d28.o", "--target=x86_64-pc-linux-gnu"]},

@@ -19,5 +19,9 @@ struct S {
      **/
     std::vector<int> vecOfInts;
     std::optional<Foo> ab;
+    /**
+     * json_dont_fail_on_deserialization=True
+     **/
+    std::optional<Foo> ac;
     int b;
 };

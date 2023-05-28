@@ -1,11 +1,23 @@
-// OPTIONAL
 std::optional<{{field.type_name}}> {{field.name}} = std::nullopt;
-const auto jv{{field.name}} = jvRoot.if_contains("{{field.json_name}}");
-if (jv{{field.name}} != nullptr) {
+const auto *jv{{field.name}} = root.if_contains("{{field.json_name}}");
+if (jv{{field.name}} != nullptr)
+{
     const auto t{{field.name}} = boost::json::try_value_to<{{field.type_name}}>(*jv{{field.name}});
-    if (t{{field.name}}.has_error()) {
-        {% include 'error-failed-to-deserialize.tmpl' indent content %}
+    {% if field.dont_fail_on_deserialization %}
+    if (t{{field.name}}.has_error())
+    {
+        // TODO: report error in some way?
     }
-
+    else
+    {
+        {{field.name}} = t{{field.name}}.value();
+    }
+    {% else %}
+    if (t{{field.name}}.has_error())
+    {
+        return t{{field.name}}.error();
+    }
     {{field.name}} = t{{field.name}}.value();
+    {% endif %}
 }
+

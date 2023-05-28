@@ -48,7 +48,7 @@ IncludeCategories:
   # Standard library includes
   - Regex: "^<[a-zA-Z_]+>$"
     Priority: 4
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Standard: Auto

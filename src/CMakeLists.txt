@@ -3,6 +3,13 @@ add_compile_definitions(QT_DISABLE_DEPRECATED_BEFORE=0x050F00)
 
 set(SOURCE_FILES
     main.cpp
+    session.cpp
+
+    payloads/subscription.cpp
+    payloads/channel-ban-v1.cpp
+    payloads/session-welcome.cpp
+
+    messages/metadata.cpp
         )
 
 add_executable(${EXECUTABLE_PROJECT} ${SOURCE_FILES})

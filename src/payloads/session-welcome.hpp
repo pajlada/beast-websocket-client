@@ -1,7 +1,6 @@
 #pragma once
 
-#include "helpers.hpp"
-#include "messages/errors.hpp"
+#include "errors.hpp"
 
 #include <boost/json.hpp>
 
@@ -24,39 +23,14 @@ namespace eventsub::payload::session_welcome {
 }
 */
 
+/// json_inner=session
 struct Payload {
     const std::string id;
 };
 
+// DESERIALIZATION DEFINITION START
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &payloadV)
-{
-    if (!payloadV.is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &payload = payloadV.get_object();
-
-    const auto *sessionV = payload.if_contains("session");
-    if (sessionV == nullptr)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    if (!sessionV->is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &session = sessionV->get_object();
-
-    const auto id = readMember<std::string>(session, "id");
-    if (!id)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-
-    return Payload{
-        .id = *id,
-    };
-}
+    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
+// DESERIALIZATION DEFINITION END
 
 }  // namespace eventsub::payload::session_welcome

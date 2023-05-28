@@ -1,7 +1,6 @@
 #pragma once
 
-#include "helpers.hpp"
-#include "messages/errors.hpp"
+#include "errors.hpp"
 #include "payloads/subscription.hpp"
 
 #include <boost/json.hpp>
@@ -48,6 +47,7 @@ namespace eventsub::payload::channel_ban::v1 {
 }
 */
 
+/// json_transform=snake_case
 struct Event {
     const std::string bannedAt;
     const std::string broadcasterUserID;
@@ -65,135 +65,18 @@ struct Event {
     const std::string userName;
 };
 
-boost::json::result_for<Event, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot)
-{
-    if (!jvRoot.is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &root = jvRoot.get_object();
-
-    const auto bannedAt = readMember<std::string>(root, "banned_at");
-    if (!bannedAt)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto broadcasterUserID =
-        readMember<std::string>(root, "broadcaster_user_id");
-    if (!broadcasterUserID)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto broadcasterUserLogin =
-        readMember<std::string>(root, "broadcaster_user_login");
-    if (!broadcasterUserLogin)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto broadcasterUserName =
-        readMember<std::string>(root, "broadcaster_user_name");
-    if (!broadcasterUserName)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto endsAt = readMember<std::string>(root, "ends_at");
-    if (!endsAt)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto isPermanent = readMember<bool>(root, "is_permanent");
-    if (!isPermanent)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto moderatorUserID =
-        readMember<std::string>(root, "moderator_user_id");
-    if (!moderatorUserID)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto moderatorUserLogin =
-        readMember<std::string>(root, "moderator_user_login");
-    if (!moderatorUserLogin)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto moderatorUserName =
-        readMember<std::string>(root, "moderator_user_name");
-    if (!moderatorUserName)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto reason = readMember<std::string>(root, "reason");
-    if (!reason)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto userID = readMember<std::string>(root, "user_id");
-    if (!userID)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto userLogin = readMember<std::string>(root, "user_login");
-    if (!userLogin)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto userName = readMember<std::string>(root, "user_name");
-    if (!userName)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-
-    return Event{
-        .bannedAt = *bannedAt,
-        .broadcasterUserID = *broadcasterUserID,
-        .broadcasterUserLogin = *broadcasterUserLogin,
-        .broadcasterUserName = *broadcasterUserName,
-        .endsAt = *endsAt,
-        .isPermanent = *isPermanent,
-        .moderatorUserID = *moderatorUserID,
-        .moderatorUserLogin = *moderatorUserLogin,
-        .moderatorUserName = *moderatorUserName,
-        .reason = *reason,
-        .userID = *userID,
-        .userLogin = *userLogin,
-        .userName = *userName,
-    };
-}
-
 struct Payload {
     const subscription::Subscription subscription;
 
     const Event event;
 };
 
+// DESERIALIZATION DEFINITION START
+boost::json::result_for<Event, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<Event>, const boost::json::value &jvRoot);
+
 boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Payload>, const boost::json::value &payloadV)
-{
-    if (!payloadV.is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &payload = payloadV.get_object();
-
-    const auto subscription =
-        readMember<subscription::Subscription>(payload, "subscription");
-    if (!subscription)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    const auto event = readMember<Event>(payload, "event");
-    if (!event)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-
-    return Payload{
-        .subscription = *subscription,
-        .event = *event,
-    };
-}
+    boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
+// DESERIALIZATION DEFINITION END
 
 }  // namespace eventsub::payload::channel_ban::v1

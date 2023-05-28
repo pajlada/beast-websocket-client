@@ -1,2 +1,2 @@
-// TODO: Make this give a better error to indicate exactly which key is missing
-return boost::system::error_code{129, error::MISSING_KEY};
+static const error::ApplicationErrorCategory error_missing_field_{{field.name}}{"Missing required key {{field.json_name}}"};
+return boost::system::error_code{129, error_missing_field_{{field.name}}};

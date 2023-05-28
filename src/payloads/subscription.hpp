@@ -1,7 +1,5 @@
 #pragma once
 
-#include "helpers.hpp"
-#include "messages/errors.hpp"
 #include "payloads/subscription.hpp"
 
 #include <boost/json.hpp>
@@ -34,37 +32,13 @@ namespace eventsub::payload::subscription {
 }
 */
 
+/// json_transform=snake_case
 struct Transport {
     const std::string method;
     const std::string sessionID;
 };
 
-boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<Transport>, const boost::json::value &jv)
-{
-    if (!jv.is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &root = jv.get_object();
-
-    auto method = readMember<std::string>(root, "method");
-    if (!method)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto sessionID = readMember<std::string>(root, "session_id");
-    if (!sessionID)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-
-    return Transport{
-        .method = *method,
-        .sessionID = *sessionID,
-    };
-}
-
+/// json_transform=snake_case
 struct Subscription {
     const std::string id;
     const std::string status;
@@ -80,61 +54,13 @@ struct Subscription {
     const int cost;
 };
 
+// DESERIALIZATION DEFINITION START
+boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<Transport>, const boost::json::value &jvRoot);
+
 boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Subscription>,
-    const boost::json::value &rootV)
-{
-    if (!rootV.is_object())
-    {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
-    }
-    const auto &root = rootV.get_object();
-
-    auto id = readMember<std::string>(root, "id");
-    if (!id)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto status = readMember<std::string>(root, "status");
-    if (!status)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto type = readMember<std::string>(root, "type");
-    if (!type)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto version = readMember<std::string>(root, "version");
-    if (!version)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto transport = readMember<Transport>(root, "transport");
-    if (!transport)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto createdAt = readMember<std::string>(root, "created_at");
-    if (!createdAt)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-    auto cost = readMember<int>(root, "cost");
-    if (!cost)
-    {
-        return boost::system::error_code{129, error::MISSING_KEY};
-    }
-
-    return Subscription{
-        .id = *id,
-        .status = *status,
-        .type = *type,
-        .version = *version,
-        .transport = *transport,
-        .createdAt = *createdAt,
-        .cost = *cost,
-    };
-}
+    const boost::json::value &jvRoot);
+// DESERIALIZATION DEFINITION END
 
 }  // namespace eventsub::payload::subscription

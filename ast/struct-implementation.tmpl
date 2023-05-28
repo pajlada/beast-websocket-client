@@ -1,11 +1,31 @@
-boost::json::result_for<{{struct.name}}, boost::json::value>::type tag_invoke(
-    boost::json::try_value_to_tag<{{struct.name}}>, const boost::json::value &jvRoot)
+boost::json::result_for<{{struct.full_name}}, boost::json::value>::type tag_invoke(
+    boost::json::try_value_to_tag<{{struct.full_name}}>, const boost::json::value &jvRoot)
 {
+    {% if struct.inner_root %}
+    if (!jvRoot.is_object())
+    {
+        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+    }
+    const auto &outerRoot = jvRoot.get_object();
+
+    const auto *jvInnerRoot = outerRoot.if_contains("{{struct.inner_root}}");
+    if (jvInnerRoot == nullptr)
+    {
+        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+    }
+    if (!jvInnerRoot->is_object())
+    {
+        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+    }
+    const auto &root = jvInnerRoot->get_object();
+    {% else %}
     if (!jvRoot.is_object())
     {
         return boost::system::error_code{129, error::EXPECTED_OBJECT};
     }
     const auto &root = jvRoot.get_object();
+    {% endif %}
+
 {% for field in struct.members %}
     {% if field.member_type == MemberType.BASIC -%}
     {% include 'field-basic.tmpl' indent content %}
@@ -18,7 +38,7 @@ boost::json::result_for<{{struct.name}}, boost::json::value>::type tag_invoke(
     {%- endif -%}
 {% endfor %}
 
-    return {{struct.name}}{
+    return {{struct.full_name}}{
 {%- for field in struct.members %}
         {% if field.member_type == MemberType.BASIC -%}
         {% include 'initializer-basic.tmpl' indent content %}

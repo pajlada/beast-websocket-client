@@ -1,6 +1,7 @@
-#include "messages/metadata.hpp"
+#include "listener.hpp"
 #include "payloads/channel-ban-v1.hpp"
 #include "payloads/session-welcome.hpp"
+#include "session.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/as_tuple.hpp>
@@ -25,22 +26,16 @@ namespace net = boost::asio;             // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
 
 using boost::asio::awaitable;
-using boost::asio::buffer;
 using boost::asio::co_spawn;
 using boost::asio::detached;
 using boost::asio::ip::tcp;
 using namespace boost::asio::experimental::awaitable_operators;
-using std::chrono::steady_clock;
 using namespace std::literals::chrono_literals;
 
 using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
 
 constexpr auto use_nothrow_awaitable =
     boost::asio::as_tuple(boost::asio::use_awaitable);
-
-using boost::json::try_value_to_tag;
-using boost::json::value;
-using boost::json::value_to_tag;
 
 using namespace eventsub;
 
@@ -50,219 +45,33 @@ void fail(beast::error_code ec, char const *what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-template <class T>
-std::optional<T> parsePayload(const boost::json::value &jv)
-{
-    auto result = try_value_to<T>(jv);
-    if (!result.has_value())
-    {
-        fail(result.error(), "parsing payload");
-        return std::nullopt;
-    }
-
-    return result.value();
-}
-
-// Subscription Type + Subscription Version
-using EventSubSubscription = std::pair<std::string, std::string>;
-
-awaitable<void> sessionReader(WebSocketStream &ws)
-{
-    std::unordered_map<
-        EventSubSubscription,
-        std::function<void(twitch::eventsub::Metadata, boost::json::value)>,
-        boost::hash<EventSubSubscription>>
-        notificationHandlers{
-            {
-                {"channel.ban", "1"},
-                [](const auto &metadata, const auto &jv) {
-                    std::cout << "channel.ban!!!\n";
-                    auto oPayload = parsePayload<
-                        eventsub::payload::channel_ban::v1::Payload>(jv);
-                    if (!oPayload)
-                    {
-                        std::cerr << "bad payload for channel.ban v1\n";
-                        return;
-                    }
-                    const auto &payload = *oPayload;
-
-                    std::cout << "channel.ban reason:" << payload.event.reason
-                              << "\n";
-                },
-            },
-        };
-
-    std::unordered_map<
-        std::string,
-        std::function<void(twitch::eventsub::Metadata, boost::json::value)>>
-        handlers{
-            {
-                "session_welcome",
-                [](const auto &metadata, const auto &jv) {
-                    std::cout << "SESSION WELCOME\n";
-
-                    auto oPayload =
-                        parsePayload<payload::session_welcome::Payload>(jv);
-                    if (!oPayload)
-                    {
-                        std::cerr << "bad payload for session welcome\n";
-                        return;
-                    }
-                    const auto &payload = *oPayload;
-
-                    std::cout << "sessionWelcome id:" << payload.id << "\n";
-                },
-            },
-            {
-                "session_keepalive",
-                [](const auto &metadata, const auto &jv) {
-                    std::cout << "Session keepalive\n";
-                },
-            },
-            {
-                "notification",
-                [&notificationHandlers](const auto &metadata, const auto &jv) {
-                    if (!metadata.subscriptionType ||
-                        !metadata.subscriptionVersion)
-                    {
-                        std::cerr << "missing subscriptionType or "
-                                     "subscriptionVersion\n";
-                        return;
-                    }
-
-                    std::cout << "Received notification for subscription "
-                              << *metadata.subscriptionType << ", version "
-                              << *metadata.subscriptionVersion << "\n";
-
-                    auto it = notificationHandlers.find(
-                        {*metadata.subscriptionType,
-                         *metadata.subscriptionVersion});
-                    if (it == notificationHandlers.end())
-                    {
-                        std::cerr << "No notification handler for "
-                                  << *metadata.subscriptionType << "\n";
-                        return;
-                    }
-
-                    it->second(metadata, jv);
-                },
-            },
-        };
-
-    for (;;)
-    {
-        // This buffer will hold the incoming message
-        beast::flat_buffer buffer;
-
-        // Read a message into our buffer
-        auto [readError, _bytes_read] =
-            co_await ws.async_read(buffer, use_nothrow_awaitable);
-        if (readError)
-        {
-            fail(readError, "read");
-            continue;
-        }
-
-        boost::json::error_code ec;
-        auto jv =
-            boost::json::parse(beast::buffers_to_string(buffer.data()), ec);
-        if (ec)
-        {
-            fail(ec, "parsing");
-            continue;
-        }
-
-        const auto *jvObject = jv.if_object();
-        if (jvObject == nullptr)
-        {
-            std::cerr << "root value was not a json object\n";
-            continue;
-        }
-
-        const auto *metadataV = jvObject->if_contains("metadata");
-        if (metadataV == nullptr)
-        {
-            std::cerr << "root value was missing the `metadata` key\n";
-            continue;
-        }
-        auto metadataResult =
-            try_value_to<twitch::eventsub::Metadata>(*metadataV);
-        if (metadataResult.has_error())
-        {
-            fail(metadataResult.error(), "parsing metadata");
-            continue;
-        }
-
-        const auto &metadata = metadataResult.value();
-
-        auto handler = handlers.find(metadata.messageType);
-
-        if (handler == handlers.end())
-        {
-            std::cout << "No handler found for " << metadata.messageType
-                      << "\n";
-
-            std::cout << "read: " << beast::make_printable(buffer.data())
-                      << std::endl;
-            continue;
-        }
-
-        std::cout << "read: " << beast::make_printable(buffer.data())
-                  << std::endl;
-
-        const auto *payloadV = jvObject->if_contains("payload");
-        if (payloadV == nullptr)
-        {
-            std::cerr << "root value was missing the `payload` key\n";
-            continue;
-        }
-
-        handler->second(metadata, *payloadV);
-    }
-}
-
-awaitable<void> sessionWriter(WebSocketStream &ws)
-{
-    for (auto i = 0; i < 5; ++i)
-    {
-        std::cout << "done with writer\n";
-
-        boost::asio::steady_timer timer(ws.get_executor());
-
-        timer.expires_after(1s);
-
-        auto [ec] = co_await timer.async_wait(use_nothrow_awaitable);
-
-        if (ec)
-        {
-            fail(ec, "writer timer");
-        }
-
-        std::cout << "write\n";
-        auto [writeError, _bytes_written] = co_await ws.async_write(
-            net::buffer(std::string("forsen")), use_nothrow_awaitable);
-        std::cout << "written\n";
-        if (writeError)
-        {
-            fail(writeError, "write");
-            continue;
-        }
-    }
-
-    std::cout << "returned xd\n";
-    co_return;
-}
-
-awaitable<WebSocketStream> session(WebSocketStream &&ws)
+awaitable<WebSocketStream> session(WebSocketStream &&ws,
+                                   std::unique_ptr<Listener> &&listener)
 {
     // start reader
     std::cout << "start reader\n";
-    co_await (sessionReader(ws));
+    co_await (sessionReader(ws, std::move(listener)));
     // co_spawn(ws.get_executor(), sessionReader(ws), detached);
     std::cout << "reader stopped\n";
 
     co_return ws;
 }
+
+class MyListener final : public Listener
+{
+public:
+    void onSessionWelcome(messages::Metadata metadata,
+                          payload::session_welcome::Payload payload) override
+    {
+        std::cout << "ON session welcome " << payload.id << " XD\n";
+    }
+
+    void onChannelBan(messages::Metadata metadata,
+                      payload::channel_ban::v1::Payload payload) override
+    {
+        std::cout << "ON CHANNEL BAN XD\n";
+    }
+};
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,
                                 const std::string host, const std::string port,
@@ -346,7 +155,8 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             continue;
         }
 
-        auto ws2 = co_await session(std::move(ws));
+        std::unique_ptr<Listener> listener = std::make_unique<MyListener>();
+        auto ws2 = co_await session(std::move(ws), std::move(listener));
 
         // Close the WebSocket connection
         auto [closeError] = co_await ws2.async_close(

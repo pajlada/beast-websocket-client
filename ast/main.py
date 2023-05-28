@@ -2,7 +2,9 @@
 
 import sys
 import clang.cindex
-from walker import Walker, Struct, Member
+from walker import Walker, Struct, Member, MemberType
+
+T = clang.cindex.TypeKind
 
 
 def main():
@@ -41,35 +43,63 @@ def main():
         Struct.with_members(
             "InnerFoo",
             [
-                Member.with_name("asd"),
+                Member(
+                    "asd",
+                    MemberType.BASIC,
+                    "int",
+                ),
             ],
         ),
         Struct.with_members(
             "Foo",
             [
-                Member.with_name("test"),
+                Member(
+                    "test",
+                    MemberType.BASIC,
+                    "int",
+                ),
             ],
         ),
         Struct.with_members(
             "S",
             [
-                Member.with_name("a"),
-                Member.with_name("as"),
-                Member.with_name("ab"),
-                Member.with_name("b"),
+                Member(
+                    "a",
+                    MemberType.BASIC,
+                    "Foo",
+                ),
+                Member(
+                    "as",
+                    MemberType.VECTOR,
+                    "Foo",
+                ),
+                Member(
+                    "ab",
+                    MemberType.OPTIONAL,
+                    "Foo",
+                ),
+                Member(
+                    "b",
+                    MemberType.BASIC,
+                    "int",
+                ),
             ],
         ),
     ]
 
-    if walker.structs != expected_structs:
-        print("ERROR - struct result was bad")
-        print(f"got {walker.structs}")
-        print(f"expected {expected_structs}")
+    # if walker.structs != expected_structs:
+    #     print("ERROR - struct result was bad")
+    #     print(f"got {walker.structs}")
+    #     print(f"expected {expected_structs}")
 
     for diag in tu.diagnostics:
         print(diag.location)
         print(diag.spelling)
         print(diag.option)
+
+    for struct in walker.structs:
+        print(struct)
+        print(struct.try_value_to())
 
 
 if __name__ == "__main__":

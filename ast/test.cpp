@@ -12,6 +12,12 @@ struct Foo {
 struct S {
     Foo a;
     std::vector<Foo> as;
+    /**
+     * 4
+     * 5
+     * json_rename=vec_of_ints
+     **/
+    std::vector<int> vecOfInts;
     std::optional<Foo> ab;
     int b;
 };

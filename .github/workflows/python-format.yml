@@ -1,5 +1,5 @@
 ---
-name: Python format
+name: Python
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   pull_request:
 
 jobs:
-  check_format:
-    name: "Check format ${{ matrix.os }}, Python ${{ matrix.python-version }}"
+  lint:
+    name: "Lint ${{ matrix.os }}, Python ${{ matrix.python-version }}"
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

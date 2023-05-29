@@ -48,8 +48,8 @@ BOOST_DISABLED_OPTIONS = [
 ]
 
 
-class Chatterino(ConanFile):
-    name = "Chatterino"
+class BeastWebsocketClient(ConanFile):
+    name = "BeastWebsocketClient"
     requires = "boost/1.81.0"
     settings = "os", "compiler", "build_type", "arch"
     default_options = {

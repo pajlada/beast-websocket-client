@@ -32,13 +32,13 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./ast/venv
-          key: ${{ matrix.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('requirements.txt') }}
+          key: ${{ matrix.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('ast/requirements.txt') }}
 
       - name: Install dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           python3 -m venv venv
-          python3 -m pip install -r requirements.txt
+          ./venv/bin/python3 -m pip install -r requirements.txt
         working-directory: ast
 
       - name: Check code style

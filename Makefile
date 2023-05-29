@@ -8,7 +8,7 @@ update-payloads: src/payloads/*.hpp
 			exit 1 ; \
 		fi ; \
 		echo "Update deserialization code for $${header_file}/$${source_file}" ; \
-		./ast/venv/bin/python3 ./ast/main.py $${header_file} | ./ast/replace-in-file.sh $${header_file} $${source_file} ; \
+		./ast/venv/bin/python3 ./ast/generate.py $${header_file} | ./ast/replace-in-file.sh $${header_file} $${source_file} ; \
 	done
 
 update-messages: src/messages/*.hpp
@@ -19,5 +19,5 @@ update-messages: src/messages/*.hpp
 			exit 1 ; \
 		fi ; \
 		echo "Update deserialization code for $${header_file}/$${source_file}" ; \
-		./ast/venv/bin/python3 ./ast/main.py $${header_file} | ./ast/replace-in-file.sh $${header_file} $${source_file} ; \
+		./ast/venv/bin/python3 ./ast/generate.py $${header_file} | ./ast/replace-in-file.sh $${header_file} $${source_file} ; \
 	done

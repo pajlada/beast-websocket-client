@@ -20,6 +20,8 @@ jobs:
         python-version: ["3.11"]
         os: ["windows-latest", "macos-latest", "ubuntu-20.04", "ubuntu-22.04"]
 
+      fail-fast: false
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4

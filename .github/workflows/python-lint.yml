@@ -7,6 +7,10 @@ on:
       - master
   pull_request:
 
+concurrency:
+  group: python-lint-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: "Lint ${{ matrix.os }}, Python ${{ matrix.python-version }}"

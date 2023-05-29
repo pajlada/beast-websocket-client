@@ -2,27 +2,73 @@ from conan import ConanFile
 from conan.tools.files import copy
 from os import path
 
+BOOST_ALL_OPTIONS = [
+    "atomic",
+    "chrono",
+    "container",
+    "context",
+    "contract",
+    "coroutine",
+    "date_time",
+    "exception",
+    "fiber",
+    "filesystem",
+    "graph",
+    "graph_parallel",
+    "iostreams",
+    "json",
+    "locale",
+    "log",
+    "math",
+    "mpi",
+    "nowide",
+    "program_options",
+    "python",
+    "random",
+    "regex",
+    "serialization",
+    "stacktrace",
+    "system",
+    "test",
+    "thread",
+    "timer",
+    "type_erasure",
+    "url",
+    "wave",
+]
+
+BOOST_ENABLED_OPTIONS = {
+    "container",
+    "json",
+    "system",
+}
+
+BOOST_DISABLED_OPTIONS = [
+    opt for opt in BOOST_ALL_OPTIONS if opt not in BOOST_ENABLED_OPTIONS
+]
+
 
 class Chatterino(ConanFile):
     name = "Chatterino"
     requires = "boost/1.81.0"
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
-        "with_benchmark": False,
         "with_openssl3": False,
         "openssl*:shared": True,
     }
+    default_options.update(
+        {f"boost*:without_{opt}": True for opt in BOOST_DISABLED_OPTIONS}
+    )
+
     options = {
-        "with_benchmark": [True, False],
         # Qt is built with OpenSSL 3 from version 6.5.0 onwards
         "with_openssl3": [True, False],
     }
     generators = "CMakeDeps", "CMakeToolchain"
 
     def requirements(self):
-        if self.options.get_safe("with_benchmark", False):
-            self.requires("benchmark/1.7.1")
-
+        self.output.warning(BOOST_DISABLED_OPTIONS)
+        self.output.warning(self.default_options)
         if self.options.get_safe("with_openssl3", False):
             self.requires("openssl/3.1.0")
         else:
@@ -41,7 +87,6 @@ class Chatterino(ConanFile):
             copy_bin(dep, "*.dylib", "bin")
             # Windows
             copy_bin(dep, "*.dll", "bin")
-            copy_bin(dep, "*.dll", "Chatterino2")  # used in CI
             # Linux
             copy(
                 self,

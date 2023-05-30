@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy
 from os import path
+from os import listdir
 
 BOOST_ALL_OPTIONS = [
     "atomic",
@@ -83,6 +84,8 @@ class BeastWebsocketClient(ConanFile):
             keep_path=False,
         )
         for dep in self.dependencies.values():
+            print(listdir(path.join(self.builder_folder, "bin")))
+            print(listdir())
             # macOS
             copy_bin(dep, "*.dylib", "bin")
             # Windows

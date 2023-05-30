@@ -67,6 +67,10 @@ class BeastWebsocketClient(ConanFile):
     }
     generators = "CMakeDeps", "CMakeToolchain"
 
+    def layout(self):
+        self.cpp.build.libdirs = ["lib"]
+        self.cpp.build.bindirs = ["bin"]
+
     def requirements(self):
         self.output.warning(BOOST_DISABLED_OPTIONS)
         self.output.warning(self.default_options)
@@ -76,25 +80,35 @@ class BeastWebsocketClient(ConanFile):
             self.requires("openssl/1.1.1t")
 
     def generate(self):
-        copy_bin = lambda dep, selector, subdir: copy(
-            self,
-            selector,
-            dep.cpp_info.bindirs[0],
-            path.join(self.build_folder, subdir),
-            keep_path=False,
-        )
         for dep in self.dependencies.values():
-            print(listdir(path.join(self.builder_folder, "bin")))
-            print(listdir())
             # macOS
-            copy_bin(dep, "*.dylib", "bin")
+            copy(
+                self,
+                "*.dylib",
+                dep.cpp_info.libdirs[0],
+                path.join(self.build_folder, self.cpp.build.libdirs[0]),
+                keep_path=False,
+            )
             # Windows
-            copy_bin(dep, "*.dll", "bin")
+            copy(
+                self,
+                "*.lib",
+                dep.cpp_info.libdirs[0],
+                path.join(self.build_folder, self.cpp.build.libdirs[0]),
+                keep_path=False,
+            )
+            copy(
+                self,
+                "*.dll",
+                dep.cpp_info.bindirs[0],
+                path.join(self.build_folder, self.cpp.build.bindirs[0]),
+                keep_path=False,
+            )
             # Linux
             copy(
                 self,
                 "*.so*",
                 dep.cpp_info.libdirs[0],
-                path.join(self.build_folder, "bin"),
+                path.join(self.build_folder, self.cpp.build.libdirs[0]),
                 keep_path=False,
             )

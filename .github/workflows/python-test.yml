@@ -38,7 +38,7 @@ jobs:
       - name: Set environment variables for Windows
         if: matrix.os == 'windows-latest'
         run: |
-          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/lib" >> "$GITHUB_ENV"
+          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/bin" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Cache LLVM and Clang

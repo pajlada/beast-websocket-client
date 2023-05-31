@@ -68,7 +68,9 @@ jobs:
       - name: Create virtual environment
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
-          ls -la "${{ runner.temp }}/llvm/lib"
+          ls -la "${{ runner.temp }}/llvm" || true
+          ls -la "${{ runner.temp }}/llvm/lib" || true
+          ls -la "${{ runner.temp }}/llvm/lib/clang" || true
           python3 -m venv venv
         shell: bash
         working-directory: ast

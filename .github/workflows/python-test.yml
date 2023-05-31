@@ -18,6 +18,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.11"]
+        clang-version: ["15.0"]
         os: ["windows-latest", "macos-latest", "ubuntu-20.04", "ubuntu-22.04"]
 
       fail-fast: false
@@ -41,20 +42,17 @@ jobs:
           echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/bin" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Cache LLVM and Clang
+      - name: Cache Clang
         id: cache-llvm
         uses: actions/cache@v3
         with:
-          path: |
-            C:/Program Files/LLVM
-            ./llvm
-            ${{ runner.temp }}/llvm
-          key: llvm
+          path: ${{ runner.temp }}/llvm
+          key: clang-${{ matrix.os }}-${{ matrix.clang-version}}
 
-      - name: Install LLVM and Clang
+      - name: Install Clang
         uses: KyleMayes/install-llvm-action@v1
         with:
-          version: "15.0"
+          version: ${{ matrix.clang-version }}
           directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 

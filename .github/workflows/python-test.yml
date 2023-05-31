@@ -29,6 +29,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Set environment variables for macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo "LIBCLANG_LIBRARY_PATH=$(pwd)/clang" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Cache LLVM and Clang
         id: cache-llvm
         uses: actions/cache@v3

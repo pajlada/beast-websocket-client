@@ -21,6 +21,15 @@ def init_clang_cindex() -> None:
         clang.cindex.Config.set_library_file(env_library_file)
         return
 
+    # 2. Has the LIBCLANG_LIBRARY_PATH environment variable been set? Use it
+    env_library_path = os.environ.get("LIBCLANG_LIBRARY_PATH")
+    if env_library_path is not None:
+        log.debug(
+            f"Setting clang library search path from LIBCLANG_LIBRARY_PATH environment variable: {env_library_path}"
+        )
+        clang.cindex.Config.set_library_path(env_library_path)
+        return
+
     import ctypes.util
 
     autodetected_path = ctypes.util.find_library("clang")

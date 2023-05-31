@@ -35,8 +35,7 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     ]
 
     parse_options = (
-        clang.cindex.TranslationUnit.PARSE_INCOMPLETE
-        | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
+        clang.cindex.TranslationUnit.PARSE_INCOMPLETE | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
     )
 
     # include_dirs can be figured out with this command: clang++ -E -x c++ - -v < /dev/null
@@ -47,11 +46,7 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     # Append dir of file
     include_dirs.append(os.path.dirname(os.path.realpath(filename)))
     # Append subdir of file
-    include_dirs.append(
-        os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(filename)), "..")
-        )
-    )
+    include_dirs.append(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "..")))
 
     for include_dir in include_dirs:
         parse_args.append(f"-I{include_dir}")

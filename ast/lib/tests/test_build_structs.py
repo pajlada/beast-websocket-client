@@ -1,6 +1,6 @@
-import pytest
+from lib import build_structs, init_clang_cindex
 
-from lib import init_clang_cindex, build_structs
+import pytest
 
 
 def init_clang():

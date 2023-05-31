@@ -99,6 +99,7 @@ jobs:
       - name: Run tests
         run: |
           ls -la venv/bin || true
+          ls -la venv/Scripts || true
           pytest
         shell: bash
         working-directory: ast

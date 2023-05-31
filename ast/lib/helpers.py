@@ -15,9 +15,7 @@ def init_clang_cindex() -> None:
     # 1. Has the LIBCLANG_LIBRARY_FILE environment variable been set? Use it
     env_library_file = os.environ.get("LIBCLANG_LIBRARY_FILE")
     if env_library_file is not None:
-        log.debug(
-            f"Setting clang library file from LIBCLANG_LIBRARY_PATH environment variable: {env_library_file}"
-        )
+        log.debug(f"Setting clang library file from LIBCLANG_LIBRARY_PATH environment variable: {env_library_file}")
         clang.cindex.Config.set_library_file(env_library_file)
         return
 

@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.files import copy
 from os import path
-from os import listdir
+import shutil
 
 BOOST_ALL_OPTIONS = [
     "atomic",
@@ -81,34 +81,38 @@ class BeastWebsocketClient(ConanFile):
 
     def generate(self):
         for dep in self.dependencies.values():
-            # macOS
-            copy(
-                self,
-                "*.dylib",
-                dep.cpp_info.libdirs[0],
-                path.join(self.build_folder, self.cpp.build.libdirs[0]),
-                keep_path=False,
-            )
-            # Windows
-            copy(
-                self,
-                "*.lib",
-                dep.cpp_info.libdirs[0],
-                path.join(self.build_folder, self.cpp.build.libdirs[0]),
-                keep_path=False,
-            )
-            copy(
-                self,
-                "*.dll",
-                dep.cpp_info.bindirs[0],
-                path.join(self.build_folder, self.cpp.build.bindirs[0]),
-                keep_path=False,
-            )
-            # Linux
-            copy(
-                self,
-                "*.so*",
-                dep.cpp_info.libdirs[0],
-                path.join(self.build_folder, self.cpp.build.libdirs[0]),
-                keep_path=False,
-            )
+            try:
+                # macOS
+                copy(
+                    self,
+                    "*.dylib",
+                    dep.cpp_info.libdirs[0],
+                    path.join(self.build_folder, self.cpp.build.libdirs[0]),
+                    keep_path=False,
+                )
+                # Windows
+                copy(
+                    self,
+                    "*.lib",
+                    dep.cpp_info.libdirs[0],
+                    path.join(self.build_folder, self.cpp.build.libdirs[0]),
+                    keep_path=False,
+                )
+                copy(
+                    self,
+                    "*.dll",
+                    dep.cpp_info.bindirs[0],
+                    path.join(self.build_folder, self.cpp.build.bindirs[0]),
+                    keep_path=False,
+                )
+                # Linux
+                copy(
+                    self,
+                    "*.so*",
+                    dep.cpp_info.libdirs[0],
+                    path.join(self.build_folder, self.cpp.build.libdirs[0]),
+                    keep_path=False,
+                )
+            except shutil.SameFileError:
+                # Ignore 'same file' errors
+                pass

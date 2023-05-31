@@ -31,13 +31,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Set environment variables for macOS
-        if: matrix.os == 'macos-latest'
+        if: (startsWith(matrix.os , 'macos'))
         run: |
           echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/lib" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for Windows
-        if: matrix.os == 'windows-latest'
+        if: (startsWith(matrix.os , 'windows'))
         run: |
           echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/bin" >> "$GITHUB_ENV"
         shell: bash
@@ -57,7 +57,7 @@ jobs:
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
       - name: Cache virtual environment
-        if: matrix.os != 'macos-latest'
+        if: (!startsWith(matrix.os , 'macos'))
         id: cache-venv
         uses: actions/cache@v3
         with:
@@ -71,8 +71,8 @@ jobs:
         shell: bash
         working-directory: ast
 
-      - name: Activate virtual environment
-        if: matrix.os != 'windows-latest'
+      - name: Activate virtual environment (macOS & Ubuntu)
+        if: (!startsWith(matrix.os , 'windows'))
         run: |
           source venv/bin/activate
           echo "PATH=$PATH" >> "$GITHUB_ENV"
@@ -80,7 +80,7 @@ jobs:
         working-directory: ast
 
       - name: Activate virtual environment (Windows)
-        if: matrix.os == 'windows-latest'
+        if: startsWith(matrix.os, 'windows')
         run: |
           source venv/Scripts/activate
           echo "PATH=$PATH" >> "$GITHUB_ENV"
@@ -89,14 +89,11 @@ jobs:
 
       - name: Install Python dependencies
         if: steps.cache-venv.outputs.cache-hit != 'true'
-        run: |
-          pip3 install -r requirements.txt
+        run: pip3 install -r requirements.txt
         shell: bash
         working-directory: ast
 
       - name: Run tests
-        run: |
-          ls -la venv/bin || true
-          pytest
+        run: pytest
         shell: bash
         working-directory: ast

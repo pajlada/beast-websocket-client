@@ -32,7 +32,7 @@ jobs:
       - name: Set environment variables for macOS
         if: matrix.os == 'macos-latest'
         run: |
-          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm" >> "$GITHUB_ENV"
+          echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/lib" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Cache LLVM and Clang
@@ -62,7 +62,7 @@ jobs:
       - name: Create virtual environment
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
-          ls -la "${{ runner.temp }}/llvm"
+          ls -la "${{ runner.temp }}/llvm/lib"
           python3 -m venv venv
         shell: bash
         working-directory: ast

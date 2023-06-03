@@ -20,6 +20,8 @@ def add_builtin_include_dirs(include_dirs: List[str]) -> None:
     log.warning(f"Quote includes: {quote_includes}")
     log.warning(f"Angle includes: {angle_includes}")
 
+    # include_dirs.append("/Library/Developer/CommandLineTools/usr/include")
+
 
 def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:
     if not os.path.isfile(filename):
@@ -38,13 +40,17 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
 
     add_builtin_include_dirs(include_dirs)
 
-    # Append dir of file
-    include_dirs.append(os.path.dirname(os.path.realpath(filename)))
-    # Append subdir of file
-    include_dirs.append(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "..")))
-
     for include_dir in include_dirs:
-        parse_args.append(f"-I{include_dir}")
+        parse_args.append(f"-isystem{include_dir}")
+
+    print(f"Include dirs: {include_dirs}")
+
+    # Append dir of file
+    file_dir = os.path.dirname(os.path.realpath(filename))
+    parse_args.append(f"-I{file_dir}")
+    # Append subdir of file
+    file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), ".."))
+    parse_args.append(f"-I{file_subdir}")
 
     # TODO: Use build_commands if available
 

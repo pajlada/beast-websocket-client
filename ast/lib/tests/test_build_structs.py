@@ -26,6 +26,9 @@ def test_simple():
 
 
 def test_vector():
+    import clang.cindex
+
+    print(clang.cindex.conf.get_filename())
     structs = build_structs("lib/tests/resources/vector.hpp")
     assert len(structs) == 1
     s = structs[0]

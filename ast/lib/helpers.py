@@ -56,7 +56,14 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
     quote_includes: List[str] = []
     angle_includes: List[str] = []
 
-    cmd = ["clang++", "-E", "-x", "c++", "-v", "-"]
+    cmd = [
+        "clang++",
+        "-E",
+        "-x",
+        "c++",
+        "-v",
+        "-",
+    ]
 
     path_entries = os.environ.get("PATH", "").split(os.pathsep)
     if os.environ.get("LLVM_PATH", None):
@@ -74,7 +81,7 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
         env={"PATH": path_str},
     )
 
-    _, errs = proc.communicate(input=None, timeout=2)
+    _, errs = proc.communicate(input=None, timeout=10)
 
     doing_quote_includes = False
     doing_angle_includes = False
@@ -95,6 +102,8 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
             continue
 
         if doing_quote_includes or doing_angle_includes:
+            if " " in line:
+                continue
             line = line.split(" ", 1)[0]
             p = os.path.realpath(line)
             if doing_quote_includes:

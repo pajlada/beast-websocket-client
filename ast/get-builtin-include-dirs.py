@@ -12,8 +12,11 @@ def main():
 
     quote_includes, angle_includes = get_clang_builtin_include_dirs()
 
-    print(f"Quote includes: {quote_includes}")
-    print(f"Angle includes: {angle_includes}")
+    # print(f"Quote includes: {quote_includes}")
+    # print(f"Angle includes: {angle_includes}")
+
+    print("Angle includes:")
+    print("\n".join(angle_includes))
 
 
 if __name__ == "__main__":

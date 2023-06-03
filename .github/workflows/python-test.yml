@@ -47,7 +47,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ runner.temp }}/llvm
-          key: clang-${{ matrix.os }}-${{ matrix.clang-version}}
+          key: clang-${{ matrix.os }}-${{ matrix.clang-version }}
 
       - name: Install Clang
         uses: KyleMayes/install-llvm-action@v1
@@ -56,16 +56,7 @@ jobs:
           directory: ${{ runner.temp }}/llvm
           cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
-      - name: Cache virtual environment
-        if: (!startsWith(matrix.os , 'macos'))
-        id: cache-venv
-        uses: actions/cache@v3
-        with:
-          path: ./ast/venv
-          key: ${{ matrix.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('ast/requirements.txt') }}
-
       - name: Create virtual environment
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           python3 -m venv venv
         shell: bash
@@ -88,12 +79,11 @@ jobs:
         working-directory: ast
 
       - name: Install Python dependencies
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: pip3 install -r requirements.txt
         shell: bash
         working-directory: ast
 
       - name: Run tests
-        run: pytest
+        run: pytest -rP
         shell: bash
         working-directory: ast

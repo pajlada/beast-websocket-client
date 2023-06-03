@@ -29,6 +29,7 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
 
     parse_args = [
         "-std=c++17",
+        "-H",
     ]
 
     parse_options = (

@@ -40,4 +40,19 @@ def test_vector():
     assert s.members[0].type_name == "std::vector<bool>"
 
 
+def test_optional():
+    import clang.cindex
+
+    print(clang.cindex.conf.get_filename())
+    structs = build_structs("lib/tests/resources/optional.hpp")
+    assert len(structs) == 1
+    s = structs[0]
+
+    assert s.name == "Optional"
+    assert len(s.members) == 1
+
+    assert s.members[0].name == "a"
+    assert s.members[0].type_name == "std::optional<bool>"
+
+
 init_clang()

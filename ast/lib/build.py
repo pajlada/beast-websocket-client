@@ -12,17 +12,6 @@ from .walker import Walker
 log = logging.getLogger(__name__)
 
 
-def add_builtin_include_dirs(include_dirs: List[str]) -> None:
-    quote_includes, angle_includes = get_clang_builtin_include_dirs()
-    include_dirs.extend(quote_includes)
-    include_dirs.extend(angle_includes)
-
-    log.warning(f"Quote includes: {quote_includes}")
-    log.warning(f"Angle includes: {angle_includes}")
-
-    # include_dirs.append("/Library/Developer/CommandLineTools/usr/include")
-
-
 def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:
     if not os.path.isfile(filename):
         raise ValueError(f"Path {filename} is not a file. cwd: {os.getcwd()}")
@@ -39,12 +28,16 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     # include_dirs can be figured out with this command: clang++ -E -x c++ - -v < /dev/null
     include_dirs: List[str] = []
 
-    add_builtin_include_dirs(include_dirs)
+    extra_includes, system_includes = get_clang_builtin_include_dirs()
 
-    for include_dir in include_dirs:
+    print(f"Extra includes: {extra_includes}")
+    print(f"System includes: {system_includes}")
+
+    for include_dir in system_includes:
         parse_args.append(f"-isystem{include_dir}")
 
-    print(f"Include dirs: {include_dirs}")
+    for extra_includes in system_includes:
+        parse_args.append(f"-I{include_dir}")
 
     # Append dir of file
     file_dir = os.path.dirname(os.path.realpath(filename))

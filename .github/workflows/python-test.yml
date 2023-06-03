@@ -43,7 +43,7 @@ jobs:
         if: (startsWith(matrix.os , 'macos'))
         run: |
           echo "LIBCLANG_LIBRARY_PATH=${{ runner.temp }}/llvm/lib" >> "$GITHUB_ENV"
-          echo "SDKROOT=\"$(xcrun --sdk macosx --show-sdk-path)\"" >> "$GITHUB_ENV"
+          echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Set environment variables for Windows

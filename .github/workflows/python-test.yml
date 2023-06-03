@@ -97,6 +97,10 @@ jobs:
         run: |
           tree /Users/runner/work/_temp/llvm/include/c++/v1 || true
           ls -la /Users/runner/work/_temp/llvm/include/c++/v1 || true
+          echo ""
+          clang++ -E -x c++ - -v < /dev/null || true
+          echo ""
+          $LLVM_PATH/bin/clang++ -E -x c++ - -v < /dev/null || true
         shell: bash
 
       - name: Run tests

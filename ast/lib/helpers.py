@@ -4,6 +4,7 @@ import contextlib
 import logging
 import os
 import subprocess
+import sys
 from io import TextIOWrapper
 from tempfile import mkstemp
 
@@ -57,11 +58,20 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
 
     cmd = ["clang++", "-E", "-x", "c++", "-v", "-"]
 
+    path_entries = os.environ.get("PATH", "").split(os.pathsep)
+    if os.environ.get("LLVM_PATH", None):
+        path_entries.insert(0, os.path.join(os.environ.get("LLVM_PATH"), "bin"))
+
+    path_str = os.pathsep.join(path_entries)
+
+    print(path_str)
+
     proc = subprocess.Popen(
         cmd,
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
+        env={"PATH": path_str},
     )
 
     _, errs = proc.communicate(input=None, timeout=2)
@@ -85,7 +95,7 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
             continue
 
         if doing_quote_includes or doing_angle_includes:
-            line = line.split(' ', 1)[0]
+            line = line.split(" ", 1)[0]
             p = os.path.realpath(line)
             if doing_quote_includes:
                 quote_includes.append(p)

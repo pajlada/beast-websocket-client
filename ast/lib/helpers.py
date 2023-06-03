@@ -84,9 +84,12 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
             doing_angle_includes = False
             continue
 
-        if doing_quote_includes:
-            quote_includes.append(os.path.realpath(line))
-        if doing_angle_includes:
-            angle_includes.append(os.path.realpath(line))
+        if doing_quote_includes or doing_angle_includes:
+            line = line.split(' ', 1)[0]
+            p = os.path.realpath(line)
+            if doing_quote_includes:
+                quote_includes.append(p)
+            if doing_angle_includes:
+                angle_includes.append(p)
 
     return (quote_includes, angle_includes)

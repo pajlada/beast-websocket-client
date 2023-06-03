@@ -23,7 +23,7 @@ def add_builtin_include_dirs(include_dirs: List[str]) -> None:
             include_dirs.append("/usr/include")
 
         case platform:
-            log.warn(f"No default includes added for platform {platform}")
+            log.warning(f"No default includes added for platform {platform}")
 
 
 def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:
@@ -60,9 +60,9 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     root = tu.cursor
 
     for diag in tu.diagnostics:
-        log.warn(diag.location)
-        log.warn(diag.spelling)
-        log.warn(diag.option)
+        log.warning(diag.location)
+        log.warning(diag.spelling)
+        log.warning(diag.option)
 
     log.debug("Walking over AST")
     walker = Walker(filename)

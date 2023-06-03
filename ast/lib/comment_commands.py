@@ -34,5 +34,5 @@ def json_transform(input_str: str, transformation: str) -> str:
             # TODO: IMPLEMENT
             return re.sub(r"(?<![A-Z])\B[A-Z]", r"_\g<0>", input_str).lower()
         case other:
-            log.warn(f"Unknown transformation '{other}', ignoring")
+            log.warning(f"Unknown transformation '{other}', ignoring")
             return input_str

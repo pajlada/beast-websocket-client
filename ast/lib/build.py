@@ -18,7 +18,8 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
 
     parse_args = [
         "-std=c++17",
-        "-H",
+        # Uncomment this if you need to debug where it tries to find headers
+        # "-H",
     ]
 
     parse_options = (
@@ -29,9 +30,6 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     include_dirs: List[str] = []
 
     extra_includes, system_includes = get_clang_builtin_include_dirs()
-
-    print(f"Extra includes: {extra_includes}")
-    print(f"System includes: {system_includes}")
 
     for include_dir in system_includes:
         parse_args.append(f"-isystem{include_dir}")

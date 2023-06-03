@@ -71,8 +71,6 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
 
     path_str = os.pathsep.join(path_entries)
 
-    print(path_str)
-
     full_env = os.environ
     full_env["PATH"] = path_str
 

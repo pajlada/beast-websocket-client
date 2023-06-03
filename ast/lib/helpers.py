@@ -1,8 +1,9 @@
-from typing import Generator, Tuple
+from typing import Generator, List, Tuple
 
 import contextlib
 import logging
 import os
+import subprocess
 from io import TextIOWrapper
 from tempfile import mkstemp
 
@@ -48,3 +49,44 @@ def temporary_file() -> Generator[Tuple[TextIOWrapper, str], None, None]:
     f.flush()
     f.close()
     log.debug(f"Closed file {path}")
+
+
+def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
+    quote_includes: List[str] = []
+    angle_includes: List[str] = []
+
+    cmd = ["clang++", "-E", "-x", "c++", "-v", "-"]
+
+    proc = subprocess.Popen(
+        cmd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+    )
+
+    _, errs = proc.communicate(input=None, timeout=2)
+
+    doing_quote_includes = False
+    doing_angle_includes = False
+
+    for line in errs.decode("utf8").splitlines():
+        line = line.strip()
+        if line == r'#include "..." search starts here:':
+            doing_angle_includes = False
+            doing_quote_includes = True
+            continue
+        if line == r"#include <...> search starts here:":
+            doing_quote_includes = False
+            doing_angle_includes = True
+            continue
+        if line == r"End of search list.":
+            doing_quote_includes = False
+            doing_angle_includes = False
+            continue
+
+        if doing_quote_includes:
+            quote_includes.append(os.path.realpath(line))
+        if doing_angle_includes:
+            angle_includes.append(os.path.realpath(line))
+
+    return (quote_includes, angle_includes)

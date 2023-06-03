@@ -2,10 +2,10 @@ from typing import List, Optional
 
 import logging
 import os
-import sys
 
 import clang.cindex
 
+from .helpers import get_clang_builtin_include_dirs
 from .struct import Struct
 from .walker import Walker
 
@@ -13,17 +13,9 @@ log = logging.getLogger(__name__)
 
 
 def add_builtin_include_dirs(include_dirs: List[str]) -> None:
-    match sys.platform:
-        case "linux":
-            include_dirs.append("/usr/include/c++/13.1.1")
-            include_dirs.append("/usr/c++/13.1.1/x86_64-pc-linux-gnu")
-            include_dirs.append("/usr/include/c++/13.1.1/backward")
-            include_dirs.append("/usr/lib/clang/15.0.7/include")
-            include_dirs.append("/usr/local/include")
-            include_dirs.append("/usr/include")
-
-        case platform:
-            log.warning(f"No default includes added for platform {platform}")
+    quote_includes, angle_includes = get_clang_builtin_include_dirs()
+    include_dirs.extend(quote_includes)
+    include_dirs.extend(angle_includes)
 
 
 def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:

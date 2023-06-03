@@ -83,6 +83,13 @@ jobs:
         shell: bash
         working-directory: ast
 
+      - name: macos test
+        if: (startsWith(matrix.os , 'macos'))
+        run: |
+          tree /Users/runner/work/_temp/llvm/iinclude/c++/v1 || true
+          ls -la /Users/runner/work/_temp/llvm/iinclude/c++/v1 || true
+        shell: bash
+
       - name: Run tests
         run: pytest -rP
         shell: bash

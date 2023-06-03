@@ -45,7 +45,7 @@ class Member:
                     # Do nothing on members
                     pass
                 case other:
-                    log.warn(f"Unknown comment command found: {other} with value {value}")
+                    log.warning(f"Unknown comment command found: {other} with value {value}")
 
     @staticmethod
     def from_field(node: clang.cindex.Cursor) -> Member:
@@ -77,7 +77,7 @@ class Member:
                                     case None:
                                         overwrite_member_type = MemberType.OPTIONAL
                                     case other:
-                                        log.warn(f"Optional cannot be added on top of other member type: {other}")
+                                        log.warning(f"Optional cannot be added on top of other member type: {other}")
 
                             case "vector":
                                 match overwrite_member_type:
@@ -86,10 +86,10 @@ class Member:
                                     case MemberType.OPTIONAL:
                                         overwrite_member_type = MemberType.OPTIONAL_VECTOR
                                     case other:
-                                        log.warn(f"Vector cannot be added on top of other member type: {other}")
+                                        log.warning(f"Vector cannot be added on top of other member type: {other}")
 
                             case other:
-                                log.warn(f"Unhandled template type: {other}")
+                                log.warning(f"Unhandled template type: {other}")
 
                     case CursorKind.TYPE_REF:
                         type_name = xd.type.spelling

@@ -60,4 +60,4 @@ class Struct:
                 case "json_inner":
                     self.inner_root = value
                 case other:
-                    log.warn(f"Unknown comment command found: {other} with value {value}")
+                    log.warning(f"Unknown comment command found: {other} with value {value}")

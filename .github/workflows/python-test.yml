@@ -30,6 +30,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: macos test
+        if: (startsWith(matrix.os , 'macos'))
+        run: |
+          xcrun --sdk macosx --show-sdk-path || true
+          xcrun --sdk macosx --show-sdk-version || true
+          ls -la /Library/Developer/CommandLineTools/SDKs/MacOSX13.sdk/usr/include || true
+          clang++ -E -x c++ - -v < /dev/null || true
+        shell: bash
+
       - name: Set environment variables for macOS
         if: (startsWith(matrix.os , 'macos'))
         run: |

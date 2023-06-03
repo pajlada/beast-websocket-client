@@ -17,8 +17,8 @@ def add_builtin_include_dirs(include_dirs: List[str]) -> None:
     include_dirs.extend(quote_includes)
     include_dirs.extend(angle_includes)
 
-    log.debug(f"Quote includes: {quote_includes}")
-    log.debug(f"Angle includes: {angle_includes}")
+    log.warning(f"Quote includes: {quote_includes}")
+    log.warning(f"Angle includes: {angle_includes}")
 
 
 def build_structs(filename: str, build_commands: Optional[str] = None) -> List[Struct]:

@@ -19,7 +19,7 @@ jobs:
       matrix:
         python-version: ["3.11"]
         clang-version: ["15.0"]
-        os: ["windows-latest", "macos-13", "ubuntu-20.04", "ubuntu-22.04"]
+        os: ["windows-latest", "macos-latest", "ubuntu-20.04", "ubuntu-22.04"]
 
       fail-fast: false
 

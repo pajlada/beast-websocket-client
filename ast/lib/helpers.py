@@ -73,12 +73,15 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
 
     print(path_str)
 
+    full_env = os.environ
+    full_env["PATH"] = path_str
+
     proc = subprocess.Popen(
         cmd,
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
-        env={"PATH": path_str},
+        env=full_env,
     )
 
     _, errs = proc.communicate(input=None, timeout=10)

@@ -1,10 +1,11 @@
-import logging
 from typing import Tuple
 
-from .jinja_env import env
+import logging
+
 from .build import build_structs
 from .format import format_code
 from .helpers import init_clang_cindex, temporary_file
+from .jinja_env import env
 from .logging import init_logging
 
 log = logging.getLogger(__name__)

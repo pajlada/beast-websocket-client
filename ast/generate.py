@@ -5,7 +5,6 @@ import sys
 
 from lib import generate, init_clang_cindex, init_logging, temporary_file
 
-
 log = logging.getLogger("generate")
 
 

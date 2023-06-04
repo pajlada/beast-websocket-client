@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 from typing import Tuple
-from io import TextIOWrapper
-import logging
-from os.path import realpath
-import sys
 
-from lib import init_logging, replace_in_file, definition_markers, implementation_markers
+import logging
+import sys
+from io import TextIOWrapper
+from os.path import realpath
+
+from lib import definition_markers, implementation_markers, init_logging, replace_in_file
 
 log = logging.getLogger("replace-in-file")
 

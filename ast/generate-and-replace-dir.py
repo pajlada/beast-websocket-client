@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import re
 import logging
-from os.path import realpath
-import sys
 import os
+import re
+import sys
+from os.path import realpath
 
-from lib import init_logging, init_clang_cindex, generate, replace_in_file, definition_markers, implementation_markers
+from lib import definition_markers, generate, implementation_markers, init_clang_cindex, init_logging, replace_in_file
 
 log = logging.getLogger("generate-and-replace-dir")
 

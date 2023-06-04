@@ -143,5 +143,4 @@ def test_const():
     assert s.members[5].type_name == "bool"
 
 
-
 init_clang()

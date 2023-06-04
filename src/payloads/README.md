@@ -64,7 +64,7 @@ If you can't do that, run the `generate-and-replace-dir.py` script manually (e.g
 Look for the `# Add your new subscription type source file above this line` comment and add the source file above that line.
 
 In my example, I added the following line:  
-`    payloads/channel-update-v1.cpp`
+`payloads/channel-update-v1.cpp`
 
 ## Add a virtual method to the Listener class in `src/listener.hpp`
 

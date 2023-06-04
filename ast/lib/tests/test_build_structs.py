@@ -20,10 +20,15 @@ def test_simple():
     assert len(s.members) == 3
 
     assert s.members[0].name == "a"
+    assert s.members[0].member_type == MemberType.BASIC
     assert s.members[0].type_name == "int"
+
     assert s.members[1].name == "b"
+    assert s.members[1].member_type == MemberType.BASIC
     assert s.members[1].type_name == "bool"
+
     assert s.members[2].name == "c"
+    assert s.members[2].member_type == MemberType.BASIC
     assert s.members[2].type_name == "char"
 
 
@@ -36,10 +41,15 @@ def test_vector():
     s = structs[0]
 
     assert s.name == "Vector"
-    assert len(s.members) == 1
+    assert len(s.members) == 2
 
     assert s.members[0].name == "a"
-    assert s.members[0].type_name == "std::vector<bool>"
+    assert s.members[0].member_type == MemberType.VECTOR
+    assert s.members[0].type_name == "bool"
+
+    assert s.members[1].name == "b"
+    assert s.members[1].member_type == MemberType.VECTOR
+    assert s.members[1].type_name == "std::vector<bool>"
 
 
 def test_optional():
@@ -55,7 +65,7 @@ def test_optional():
 
     assert s.members[0].name == "a"
     assert s.members[0].member_type == MemberType.OPTIONAL
-    assert s.members[0].type_name == "std::optional<bool>"
+    assert s.members[0].type_name == "bool"
 
 
 def test_vector_pod():
@@ -71,10 +81,15 @@ def test_vector_pod():
     assert len(s.members) == 3
 
     assert s.members[0].name == "a"
+    assert s.members[0].member_type == MemberType.BASIC
     assert s.members[0].type_name == "int"
+
     assert s.members[1].name == "b"
+    assert s.members[1].member_type == MemberType.BASIC
     assert s.members[1].type_name == "bool"
+
     assert s.members[2].name == "c"
+    assert s.members[2].member_type == MemberType.BASIC
     assert s.members[2].type_name == "char"
 
     s = structs[1]

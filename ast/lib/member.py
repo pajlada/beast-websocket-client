@@ -64,6 +64,8 @@ class Member:
             # log.debug(node.type.get_template_argument_type(0).get_named_type().spelling)
             # log.debug(node.type.get_template_argument_type(0).get_class_type().spelling)
 
+            type_name = node.type.get_template_argument_type(0).spelling
+
             for xd in node.get_children():
                 match xd.kind:
                     case CursorKind.NAMESPACE_REF:

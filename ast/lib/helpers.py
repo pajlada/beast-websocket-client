@@ -66,8 +66,10 @@ def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
     ]
 
     path_entries = os.environ.get("PATH", "").split(os.pathsep)
-    if os.environ.get("LLVM_PATH", None):
-        path_entries.insert(0, os.path.join(os.environ.get("LLVM_PATH"), "bin"))
+
+    llvm_path = os.environ.get("LLVM_PATH")
+    if llvm_path is not None:
+        path_entries.insert(0, os.path.join(llvm_path, "bin"))
 
     path_str = os.pathsep.join(path_entries)
 

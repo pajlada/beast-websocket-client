@@ -1,4 +1,5 @@
-from lib import build_structs, init_clang_cindex
+from lib.build import build_structs
+from lib.helpers import init_clang_cindex
 
 import pytest
 

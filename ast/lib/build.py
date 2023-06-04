@@ -26,15 +26,12 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
         clang.cindex.TranslationUnit.PARSE_INCOMPLETE | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
     )
 
-    # include_dirs can be figured out with this command: clang++ -E -x c++ - -v < /dev/null
-    include_dirs: List[str] = []
-
     extra_includes, system_includes = get_clang_builtin_include_dirs()
 
     for include_dir in system_includes:
         parse_args.append(f"-isystem{include_dir}")
 
-    for extra_includes in system_includes:
+    for include_dir in extra_includes:
         parse_args.append(f"-I{include_dir}")
 
     # Append dir of file

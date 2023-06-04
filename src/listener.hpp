@@ -18,11 +18,14 @@ public:
         messages::Metadata metadata,
         payload::session_welcome::Payload payload) = 0;
 
+    // Subscription types
     virtual void onChannelBan(messages::Metadata metadata,
                               payload::channel_ban::v1::Payload payload) = 0;
+
     virtual void onStreamOnline(
         messages::Metadata metadata,
         payload::stream_online::v1::Payload payload) = 0;
+
     virtual void onStreamOffline(
         messages::Metadata metadata,
         payload::stream_offline::v1::Payload payload) = 0;
@@ -30,6 +33,8 @@ public:
     virtual void onChannelUpdate(
         messages::Metadata metadata,
         payload::channel_update::v1::Payload payload) = 0;
+
+    // Add your new subscription types above this line
 };
 
 }  // namespace eventsub

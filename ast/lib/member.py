@@ -13,6 +13,15 @@ from .membertype import MemberType
 log = logging.getLogger(__name__)
 
 
+def get_type_name(type: clang.cindex.Type) -> str:
+    type_name = type.spelling
+
+    if type.is_const_qualified():
+        type_name = type_name.replace("const", "").strip()
+
+    return type_name
+
+
 class Member:
     def __init__(
         self,
@@ -53,7 +62,9 @@ class Member:
 
         name = node.spelling
         member_type = MemberType.BASIC
-        type_name = node.type.spelling
+        type_name = get_type_name(node.type)
+
+        log.debug(f"{node.spelling} - {type_name} - {node.type.is_const_qualified()}")
 
         ntargs = node.type.get_num_template_arguments()
         if ntargs > 0:
@@ -64,7 +75,7 @@ class Member:
             # log.debug(node.type.get_template_argument_type(0).get_named_type().spelling)
             # log.debug(node.type.get_template_argument_type(0).get_class_type().spelling)
 
-            type_name = node.type.get_template_argument_type(0).spelling
+            type_name = get_type_name(node.type.get_template_argument_type(0))
 
             for xd in node.get_children():
                 match xd.kind:
@@ -94,7 +105,7 @@ class Member:
                                 log.warning(f"Unhandled template type: {other}")
 
                     case CursorKind.TYPE_REF:
-                        type_name = xd.type.spelling
+                        type_name = get_type_name(xd.type)
 
                     case other:
                         log.debug(f"Unhandled child kind type: {other}")

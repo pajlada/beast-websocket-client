@@ -102,4 +102,45 @@ def test_vector_pod():
     assert s.members[0].type_name == "Pod"
 
 
+def test_const():
+    import clang.cindex
+
+    print(clang.cindex.conf.get_filename())
+    structs = build_structs("lib/tests/resources/const.hpp")
+    assert len(structs) == 2
+
+    s = structs[0]
+    assert s.name == "Pod"
+    assert len(s.members) == 0
+
+    s = structs[1]
+
+    assert s.name == "Const"
+    assert len(s.members) == 6
+
+    assert s.members[0].name == "a"
+    assert s.members[0].member_type == MemberType.BASIC
+    assert s.members[0].type_name == "int"
+
+    assert s.members[1].name == "b"
+    assert s.members[1].member_type == MemberType.BASIC
+    assert s.members[1].type_name == "bool"
+
+    assert s.members[2].name == "c"
+    assert s.members[2].member_type == MemberType.BASIC
+    assert s.members[2].type_name == "char"
+
+    assert s.members[3].name == "d"
+    assert s.members[3].member_type == MemberType.BASIC
+    assert s.members[3].type_name == "Pod"
+
+    assert s.members[4].name == "e"
+    assert s.members[4].member_type == MemberType.VECTOR
+    assert s.members[4].type_name == "bool"
+
+    assert s.members[5].name == "f"
+    assert s.members[5].member_type == MemberType.OPTIONAL
+    assert s.members[5].type_name == "bool"
+
+
 init_clang()

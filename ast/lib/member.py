@@ -55,6 +55,12 @@ class Member:
         member_type = MemberType.BASIC
         type_name = node.type.spelling
 
+        # Strip constness
+        if node.type.is_const_qualified():
+            type_name = type_name.replace("const", "").strip()
+
+        log.debug(f"{node.spelling} - {type_name} - {node.type.is_const_qualified()}")
+
         ntargs = node.type.get_num_template_arguments()
         if ntargs > 0:
             overwrite_member_type: Optional[MemberType] = None

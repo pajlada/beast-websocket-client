@@ -1,5 +1,6 @@
 from lib.build import build_structs
 from lib.helpers import init_clang_cindex
+from lib.membertype import MemberType
 
 import pytest
 
@@ -53,7 +54,37 @@ def test_optional():
     assert len(s.members) == 1
 
     assert s.members[0].name == "a"
+    assert s.members[0].member_type == MemberType.OPTIONAL
     assert s.members[0].type_name == "std::optional<bool>"
+
+
+def test_vector_pod():
+    import clang.cindex
+
+    print(clang.cindex.conf.get_filename())
+    structs = build_structs("lib/tests/resources/vector-pod.hpp")
+    assert len(structs) == 2
+
+    s = structs[0]
+
+    assert s.name == "Pod"
+    assert len(s.members) == 3
+
+    assert s.members[0].name == "a"
+    assert s.members[0].type_name == "int"
+    assert s.members[1].name == "b"
+    assert s.members[1].type_name == "bool"
+    assert s.members[2].name == "c"
+    assert s.members[2].type_name == "char"
+
+    s = structs[1]
+
+    assert s.name == "VectorPod"
+    assert len(s.members) == 1
+
+    assert s.members[0].name == "a"
+    assert s.members[0].member_type == MemberType.VECTOR
+    assert s.members[0].type_name == "Pod"
 
 
 init_clang()

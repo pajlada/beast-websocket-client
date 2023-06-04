@@ -6,8 +6,11 @@ set(SOURCE_FILES
     session.cpp
 
     payloads/subscription.cpp
-    payloads/channel-ban-v1.cpp
     payloads/session-welcome.cpp
+
+    payloads/channel-ban-v1.cpp
+    payloads/stream-online-v1.cpp
+    payloads/stream-offline-v1.cpp
 
     messages/metadata.cpp
         )

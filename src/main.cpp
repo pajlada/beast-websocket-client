@@ -71,6 +71,18 @@ public:
     {
         std::cout << "ON CHANNEL BAN XD\n";
     }
+
+    void onStreamOnline(messages::Metadata metadata,
+                        payload::stream_online::v1::Payload payload) override
+    {
+        std::cout << "ON STREAM ONLINE XD\n";
+    }
+
+    void onStreamOffline(messages::Metadata metadata,
+                         payload::stream_offline::v1::Payload payload) override
+    {
+        std::cout << "ON STREAM OFFLINE XD\n";
+    }
 };
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,

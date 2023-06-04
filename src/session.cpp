@@ -73,9 +73,32 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
             {
                 return;
             }
-            const auto &payload = *oPayload;
-
-            listener->onChannelBan(metadata, payload);
+            listener->onChannelBan(metadata, *oPayload);
+        },
+    },
+    {
+        {"stream.online", "1"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload =
+                parsePayload<eventsub::payload::stream_online::v1::Payload>(jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onStreamOnline(metadata, *oPayload);
+        },
+    },
+    {
+        {"stream.offline", "1"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload =
+                parsePayload<eventsub::payload::stream_offline::v1::Payload>(
+                    jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onStreamOffline(metadata, *oPayload);
         },
     },
 };

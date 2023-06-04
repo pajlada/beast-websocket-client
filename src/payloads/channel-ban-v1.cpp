@@ -100,8 +100,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
                 "Missing required key is_permanent"};
         return boost::system::error_code{129, error_missing_field_isPermanent};
     }
-    const auto isPermanent =
-        boost::json::try_value_to<const bool>(*jvisPermanent);
+    const auto isPermanent = boost::json::try_value_to<bool>(*jvisPermanent);
     if (isPermanent.has_error())
     {
         return isPermanent.error();
@@ -242,8 +241,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_subscription};
     }
     const auto subscription =
-        boost::json::try_value_to<const subscription::Subscription>(
-            *jvsubscription);
+        boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
     if (subscription.has_error())
     {
         return subscription.error();
@@ -256,8 +254,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
-    const auto event = boost::json::try_value_to<
-        const eventsub::payload::channel_ban::v1::Event>(*jvevent);
+    const auto event =
+        boost::json::try_value_to<eventsub::payload::channel_ban::v1::Event>(
+            *jvevent);
     if (event.has_error())
     {
         return event.error();

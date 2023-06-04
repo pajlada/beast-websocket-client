@@ -37,6 +37,8 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.FunctionCase
     value: camelBack
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: ^tag_invoke$
   - key: readability-identifier-naming.MemberCase
     value: camelBack
   - key: readability-identifier-naming.PrivateMemberIgnoredRegexp

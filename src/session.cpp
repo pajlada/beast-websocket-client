@@ -63,6 +63,7 @@ std::optional<T> parsePayload(const boost::json::value &jv)
     return result.value();
 }
 
+// Subscription types
 const NotificationHandlers NOTIFICATION_HANDLERS{
     {
         {"channel.ban", "1"},
@@ -114,6 +115,7 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
             listener->onChannelUpdate(metadata, *oPayload);
         },
     },
+    // Add your new subscription types above this line
 };
 
 const MessageHandlers MESSAGE_HANDLERS{

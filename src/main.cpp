@@ -89,6 +89,8 @@ public:
     {
         std::cout << "Channel update event!\n";
     }
+
+    // Add your new subscription types above this line
 };
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,

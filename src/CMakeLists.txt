@@ -8,10 +8,12 @@ set(SOURCE_FILES
     payloads/subscription.cpp
     payloads/session-welcome.cpp
 
+    # Subscription types
     payloads/channel-ban-v1.cpp
     payloads/stream-online-v1.cpp
     payloads/stream-offline-v1.cpp
     payloads/channel-update-v1.cpp
+    # Add your new subscription type source file above this line
 
     messages/metadata.cpp
         )

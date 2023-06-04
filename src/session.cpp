@@ -101,6 +101,19 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
             listener->onStreamOffline(metadata, *oPayload);
         },
     },
+    {
+        {"channel.update", "1"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload =
+                parsePayload<eventsub::payload::channel_update::v1::Payload>(
+                    jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onChannelUpdate(metadata, *oPayload);
+        },
+    },
 };
 
 const MessageHandlers MESSAGE_HANDLERS{

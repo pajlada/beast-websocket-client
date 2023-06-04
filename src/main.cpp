@@ -83,6 +83,12 @@ public:
     {
         std::cout << "ON STREAM OFFLINE XD\n";
     }
+
+    void onChannelUpdate(messages::Metadata metadata,
+                         payload::channel_update::v1::Payload payload) override
+    {
+        std::cout << "Channel update event!\n";
+    }
 };
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,

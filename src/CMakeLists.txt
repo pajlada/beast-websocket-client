@@ -11,6 +11,7 @@ set(SOURCE_FILES
     payloads/channel-ban-v1.cpp
     payloads/stream-online-v1.cpp
     payloads/stream-offline-v1.cpp
+    payloads/channel-update-v1.cpp
 
     messages/metadata.cpp
         )

@@ -2,6 +2,7 @@
 
 #include "messages/metadata.hpp"
 #include "payloads/channel-ban-v1.hpp"
+#include "payloads/channel-update-v1.hpp"
 #include "payloads/session-welcome.hpp"
 #include "payloads/stream-offline-v1.hpp"
 #include "payloads/stream-online-v1.hpp"
@@ -25,6 +26,10 @@ public:
     virtual void onStreamOffline(
         messages::Metadata metadata,
         payload::stream_offline::v1::Payload payload) = 0;
+
+    virtual void onChannelUpdate(
+        messages::Metadata metadata,
+        payload::channel_update::v1::Payload payload) = 0;
 };
 
 }  // namespace eventsub

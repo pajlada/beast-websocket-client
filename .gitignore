@@ -82,7 +82,6 @@ Thumbs.db
 .idea
 dependencies
 .cache
-.editorconfig
 
 ### CMake ###
 CMakeLists.txt.user

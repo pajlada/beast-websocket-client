@@ -1,6 +1,5 @@
 #pragma once
 
-#include "errors.hpp"
 #include "payloads/subscription.hpp"
 
 #include <boost/json.hpp>

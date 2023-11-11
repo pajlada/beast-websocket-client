@@ -6,7 +6,6 @@
 #include "eventsub/payloads/session-welcome.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -20,9 +19,6 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
-
-constexpr auto use_nothrow_awaitable =
-    boost::asio::as_tuple(boost::asio::use_awaitable);
 
 namespace beast = boost::beast;  // from <boost/beast.hpp>
 
@@ -240,8 +236,10 @@ boost::asio::awaitable<void> sessionReader(WebSocketStream &ws,
         beast::flat_buffer buffer;
 
         // Read a message into our buffer
-        auto [readError, _bytes_read] =
-            co_await ws.async_read(buffer, use_nothrow_awaitable);
+        boost::system::error_code readError;
+        auto result = co_await ws.async_read(
+            buffer,
+            boost::asio::redirect_error(boost::asio::use_awaitable, readError));
         if (readError)
         {
             fail(readError, "read");

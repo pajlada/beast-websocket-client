@@ -4,7 +4,6 @@
 #include "eventsub/session.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -33,9 +32,6 @@ using namespace boost::asio::experimental::awaitable_operators;
 using namespace std::literals::chrono_literals;
 
 using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
-
-constexpr auto use_nothrow_awaitable =
-    boost::asio::as_tuple(boost::asio::use_awaitable);
 
 using namespace eventsub;
 
@@ -118,8 +114,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
     {
         // TODO: wait on (AND INCREMENT) backoff timer
 
-        auto [resolveError, target] = co_await tcpResolver.async_resolve(
-            host, port, use_nothrow_awaitable);
+        boost::system::error_code resolveError;
+        auto target = co_await tcpResolver.async_resolve(
+            host, port,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        resolveError));
 
         std::cout << "Connecting to " << host << ":" << port << "\n";
         if (resolveError)
@@ -131,9 +130,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
         WebSocketStream ws(ioContext, sslContext);
 
         // Make the connection on the IP address we get from a lookup
-        auto [connectError, endpoint] =
-            co_await beast::get_lowest_layer(ws).async_connect(
-                target, use_nothrow_awaitable);
+        // TODO: Check connectError
+        boost::system::error_code connectError;
+        auto endpoint = co_await beast::get_lowest_layer(ws).async_connect(
+            target, boost::asio::redirect_error(boost::asio::use_awaitable,
+                                                connectError));
 
         std::string hostHeader = host;
 
@@ -164,8 +165,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             }));
 
         // Perform the SSL handshake
-        auto [sslHandshakeError] = co_await ws.next_layer().async_handshake(
-            ssl::stream_base::client, use_nothrow_awaitable);
+        boost::system::error_code sslHandshakeError;
+        co_await ws.next_layer().async_handshake(
+            ssl::stream_base::client,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        sslHandshakeError));
         if (sslHandshakeError)
         {
             fail(sslHandshakeError, "ssl_handshake");
@@ -181,11 +185,14 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             beast::role_type::client));
 
         // Perform the websocket handshake
-        auto [ws_handshake_ec] = co_await ws.async_handshake(
-            hostHeader, path, use_nothrow_awaitable);
-        if (ws_handshake_ec)
+        boost::system::error_code wsHandshakeError;
+        co_await ws.async_handshake(
+            hostHeader, path,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        wsHandshakeError));
+        if (wsHandshakeError)
         {
-            fail(ws_handshake_ec, "handshake");
+            fail(wsHandshakeError, "handshake");
             continue;
         }
 
@@ -193,8 +200,10 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
         auto ws2 = co_await session(std::move(ws), std::move(listener));
 
         // Close the WebSocket connection
-        auto [closeError] = co_await ws2.async_close(
-            websocket::close_code::normal, use_nothrow_awaitable);
+        boost::system::error_code closeError;
+        co_await ws2.async_close(websocket::close_code::normal,
+                                 boost::asio::redirect_error(
+                                     boost::asio::use_awaitable, closeError));
         if (closeError)
         {
             fail(closeError, "close");

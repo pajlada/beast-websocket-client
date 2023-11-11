@@ -1,6 +1,6 @@
-#include "payloads/session-welcome.hpp"
+#include "eventsub/payloads/session-welcome.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 

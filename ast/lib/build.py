@@ -37,8 +37,8 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     # Append dir of file
     file_dir = os.path.dirname(os.path.realpath(filename))
     parse_args.append(f"-I{file_dir}")
-    # Append subdir of file
-    file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), ".."))
+    # Append project include dir
+    file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "../.."))
     parse_args.append(f"-I{file_subdir}")
 
     # TODO: Use build_commands if available

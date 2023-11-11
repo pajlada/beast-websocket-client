@@ -3,16 +3,16 @@ cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE
 cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 include(FeatureSummary)
 
+option(EVENTSUB_BUILD_EXAMPLE "Build example application" OFF)
+
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
     )
 
-project(beast-websocket-client VERSION 2.4.3)
+project(eventsub VERSION 0.1.0)
 
 # Find boost on the system
-# `OPTIONAL_COMPONENTS random` is required for vcpkg builds to link.
-# `OPTIONAL` is required, because conan doesn't set `boost_random_FOUND`.
-find_package(Boost REQUIRED OPTIONAL_COMPONENTS random json)
+find_package(Boost REQUIRED OPTIONAL_COMPONENTS json)
 
 # Find OpenSSL on the system
 find_package(OpenSSL REQUIRED)
@@ -25,5 +25,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(src)
+
+if (EVENTSUB_BUILD_EXAMPLE)
+    add_subdirectory(example)
+endif ()
 
 feature_summary(WHAT ALL)

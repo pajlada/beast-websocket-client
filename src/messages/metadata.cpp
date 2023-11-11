@@ -1,6 +1,6 @@
-#include "messages/metadata.hpp"
+#include "eventsub/messages/metadata.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 

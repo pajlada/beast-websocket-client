@@ -44,27 +44,22 @@ BOOST_ENABLED_OPTIONS = {
     "system",
 }
 
-BOOST_DISABLED_OPTIONS = [
-    opt for opt in BOOST_ALL_OPTIONS if opt not in BOOST_ENABLED_OPTIONS
-]
+BOOST_DISABLED_OPTIONS = [opt for opt in BOOST_ALL_OPTIONS if opt not in BOOST_ENABLED_OPTIONS]
 
 
-class BeastWebsocketClient(ConanFile):
-    name = "BeastWebsocketClient"
-    requires = "boost/1.81.0"
+class Eventsub(ConanFile):
+    name = "Eventsub"
+    requires = [
+        "boost/[~1.81]",
+        "openssl/[~3]",
+    ]
     settings = "os", "compiler", "build_type", "arch"
     default_options = {
-        "with_openssl3": False,
         "openssl*:shared": True,
     }
-    default_options.update(
-        {f"boost*:without_{opt}": True for opt in BOOST_DISABLED_OPTIONS}
-    )
+    default_options.update({f"boost*:without_{opt}": True for opt in BOOST_DISABLED_OPTIONS})
 
-    options = {
-        # Qt is built with OpenSSL 3 from version 6.5.0 onwards
-        "with_openssl3": [True, False],
-    }
+    options = {}
     generators = "CMakeDeps", "CMakeToolchain"
 
     def layout(self):
@@ -74,10 +69,6 @@ class BeastWebsocketClient(ConanFile):
     def requirements(self):
         self.output.warning(BOOST_DISABLED_OPTIONS)
         self.output.warning(self.default_options)
-        if self.options.get_safe("with_openssl3", False):
-            self.requires("openssl/3.1.0")
-        else:
-            self.requires("openssl/1.1.1t")
 
     def generate(self):
         for dep in self.dependencies.values():

@@ -1,12 +1,11 @@
-#include "session.hpp"
+#include "eventsub/session.hpp"
 
-#include "listener.hpp"
-#include "messages/metadata.hpp"
-#include "payloads/channel-ban-v1.hpp"
-#include "payloads/session-welcome.hpp"
+#include "eventsub/listener.hpp"
+#include "eventsub/messages/metadata.hpp"
+#include "eventsub/payloads/channel-ban-v1.hpp"
+#include "eventsub/payloads/session-welcome.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -20,9 +19,6 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
-
-constexpr auto use_nothrow_awaitable =
-    boost::asio::as_tuple(boost::asio::use_awaitable);
 
 namespace beast = boost::beast;  // from <boost/beast.hpp>
 
@@ -100,6 +96,19 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
                 return;
             }
             listener->onStreamOffline(metadata, *oPayload);
+        },
+    },
+    {
+        {"channel.chat.notification", "beta"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload = parsePayload<
+                eventsub::payload::channel_chat_notification::beta::Payload>(
+                jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onChannelChatNotification(metadata, *oPayload);
         },
     },
     {
@@ -227,8 +236,10 @@ boost::asio::awaitable<void> sessionReader(WebSocketStream &ws,
         beast::flat_buffer buffer;
 
         // Read a message into our buffer
-        auto [readError, _bytes_read] =
-            co_await ws.async_read(buffer, use_nothrow_awaitable);
+        boost::system::error_code readError;
+        auto result = co_await ws.async_read(
+            buffer,
+            boost::asio::redirect_error(boost::asio::use_awaitable, readError));
         if (readError)
         {
             fail(readError, "read");

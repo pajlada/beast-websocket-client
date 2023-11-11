@@ -1,6 +1,6 @@
-#include "payloads/channel-ban-v1.hpp"
+#include "eventsub/payloads/channel-ban-v1.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 
@@ -254,9 +254,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
-    const auto event =
-        boost::json::try_value_to<eventsub::payload::channel_ban::v1::Event>(
-            *jvevent);
+    const auto event = boost::json::try_value_to<Event>(*jvevent);
     if (event.has_error())
     {
         return event.error();

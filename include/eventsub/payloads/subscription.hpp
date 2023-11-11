@@ -1,6 +1,6 @@
 #pragma once
 
-#include "payloads/subscription.hpp"
+#include "eventsub/payloads/subscription.hpp"
 
 #include <boost/json.hpp>
 

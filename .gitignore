@@ -68,9 +68,6 @@ Session.vim
 # Vim Auto-generated tag files
 tags
 
-# rapidjson directory
-rapidjson/*
-
 Thumbs.db
 
 # I HATE MAC

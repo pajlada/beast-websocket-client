@@ -1,10 +1,9 @@
-#include "listener.hpp"
-#include "payloads/channel-ban-v1.hpp"
-#include "payloads/session-welcome.hpp"
-#include "session.hpp"
+#include "eventsub/listener.hpp"
+#include "eventsub/payloads/channel-ban-v1.hpp"
+#include "eventsub/payloads/session-welcome.hpp"
+#include "eventsub/session.hpp"
 
 #include <boost/asio.hpp>
-#include <boost/asio/as_tuple.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
@@ -33,9 +32,6 @@ using namespace boost::asio::experimental::awaitable_operators;
 using namespace std::literals::chrono_literals;
 
 using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
-
-constexpr auto use_nothrow_awaitable =
-    boost::asio::as_tuple(boost::asio::use_awaitable);
 
 using namespace eventsub;
 
@@ -69,7 +65,14 @@ public:
     void onChannelBan(messages::Metadata metadata,
                       payload::channel_ban::v1::Payload payload) override
     {
-        std::cout << "ON CHANNEL BAN XD\n";
+        (void)metadata;
+        std::cout << "Channel ban occured in "
+                  << payload.event.broadcasterUserLogin << "'s channel:"
+                  << " isPermanent=" << payload.event.isPermanent
+                  << " reason=" << payload.event.reason
+                  << " userLogin=" << payload.event.userLogin
+                  << " moderatorLogin=" << payload.event.moderatorUserLogin
+                  << '\n';
     }
 
     void onStreamOnline(messages::Metadata metadata,
@@ -82,6 +85,13 @@ public:
                          payload::stream_offline::v1::Payload payload) override
     {
         std::cout << "ON STREAM OFFLINE XD\n";
+    }
+
+    void onChannelChatNotification(
+        messages::Metadata metadata,
+        payload::channel_chat_notification::beta::Payload payload) override
+    {
+        std::cout << "Received channel.chat.notification beta\n";
     }
 
     void onChannelUpdate(messages::Metadata metadata,
@@ -104,8 +114,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
     {
         // TODO: wait on (AND INCREMENT) backoff timer
 
-        auto [resolveError, target] = co_await tcpResolver.async_resolve(
-            host, port, use_nothrow_awaitable);
+        boost::system::error_code resolveError;
+        auto target = co_await tcpResolver.async_resolve(
+            host, port,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        resolveError));
 
         std::cout << "Connecting to " << host << ":" << port << "\n";
         if (resolveError)
@@ -117,9 +130,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
         WebSocketStream ws(ioContext, sslContext);
 
         // Make the connection on the IP address we get from a lookup
-        auto [connectError, endpoint] =
-            co_await beast::get_lowest_layer(ws).async_connect(
-                target, use_nothrow_awaitable);
+        // TODO: Check connectError
+        boost::system::error_code connectError;
+        auto endpoint = co_await beast::get_lowest_layer(ws).async_connect(
+            target, boost::asio::redirect_error(boost::asio::use_awaitable,
+                                                connectError));
 
         std::string hostHeader = host;
 
@@ -150,8 +165,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             }));
 
         // Perform the SSL handshake
-        auto [sslHandshakeError] = co_await ws.next_layer().async_handshake(
-            ssl::stream_base::client, use_nothrow_awaitable);
+        boost::system::error_code sslHandshakeError;
+        co_await ws.next_layer().async_handshake(
+            ssl::stream_base::client,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        sslHandshakeError));
         if (sslHandshakeError)
         {
             fail(sslHandshakeError, "ssl_handshake");
@@ -167,11 +185,14 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             beast::role_type::client));
 
         // Perform the websocket handshake
-        auto [ws_handshake_ec] = co_await ws.async_handshake(
-            hostHeader, path, use_nothrow_awaitable);
-        if (ws_handshake_ec)
+        boost::system::error_code wsHandshakeError;
+        co_await ws.async_handshake(
+            hostHeader, path,
+            boost::asio::redirect_error(boost::asio::use_awaitable,
+                                        wsHandshakeError));
+        if (wsHandshakeError)
         {
-            fail(ws_handshake_ec, "handshake");
+            fail(wsHandshakeError, "handshake");
             continue;
         }
 
@@ -179,8 +200,10 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
         auto ws2 = co_await session(std::move(ws), std::move(listener));
 
         // Close the WebSocket connection
-        auto [closeError] = co_await ws2.async_close(
-            websocket::close_code::normal, use_nothrow_awaitable);
+        boost::system::error_code closeError;
+        co_await ws2.async_close(websocket::close_code::normal,
+                                 boost::asio::redirect_error(
+                                     boost::asio::use_awaitable, closeError));
         if (closeError)
         {
             fail(closeError, "close");
@@ -201,8 +224,14 @@ int main(int argc, char **argv)
     {
         boost::asio::io_context ctx;
 
-        const auto *const host = "localhost";
-        const auto *const port = "3012";
+        // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
+        // const auto *const host = "localhost";
+        // const auto *const port = "3012";
+        // const auto *const path = "/ws";
+
+        // for use with real Twitch eventsub
+        const auto *const host = "eventsub.wss.twitch.tv";
+        const auto *const port = "443";
         const auto *const path = "/ws";
 
         boost::asio::ssl::context sslContext{

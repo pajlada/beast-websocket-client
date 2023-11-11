@@ -29,6 +29,10 @@ set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
 target_include_directories(${EXECUTABLE_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+if (MSVC)
+    target_compile_options(${EXECUTABLE_PROJECT} PUBLIC /EHsc /bigobj)
+endif ()
+
 if (LIBRT)
     target_link_libraries(${EXECUTABLE_PROJECT}
         PUBLIC

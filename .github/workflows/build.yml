@@ -111,18 +111,8 @@ jobs:
           sudo apt-get -y install \
               cmake \
               virtualenv \
-              rapidjson-dev \
-              libfuse2 \
               libssl-dev \
-              libpulse-dev \
-              libxkbcommon-x11-0 \
-              build-essential \
-              libgl1-mesa-dev \
-              libxcb-icccm4 \
-              libxcb-image0 \
-              libxcb-keysyms1 \
-              libxcb-render-util0 \
-              libxcb-xinerama0
+              build-essential
 
       # LINUX
       - name: Install boost (Ubuntu)
@@ -163,7 +153,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-          brew install boost openssl rapidjson p7zip create-dmg cmake tree
+          brew install boost openssl cmake tree
         shell: bash
 
       - name: Build (MacOS)

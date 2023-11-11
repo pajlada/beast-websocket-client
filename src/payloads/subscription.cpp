@@ -1,6 +1,6 @@
-#include "payloads/subscription.hpp"
+#include "eventsub/payloads/subscription.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 

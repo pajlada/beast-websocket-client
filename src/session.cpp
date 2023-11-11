@@ -1,9 +1,9 @@
-#include "session.hpp"
+#include "eventsub/session.hpp"
 
-#include "listener.hpp"
-#include "messages/metadata.hpp"
-#include "payloads/channel-ban-v1.hpp"
-#include "payloads/session-welcome.hpp"
+#include "eventsub/listener.hpp"
+#include "eventsub/messages/metadata.hpp"
+#include "eventsub/payloads/channel-ban-v1.hpp"
+#include "eventsub/payloads/session-welcome.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/as_tuple.hpp>
@@ -100,6 +100,19 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
                 return;
             }
             listener->onStreamOffline(metadata, *oPayload);
+        },
+    },
+    {
+        {"channel.chat.notification", "beta"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload = parsePayload<
+                eventsub::payload::channel_chat_notification::beta::Payload>(
+                jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onChannelChatNotification(metadata, *oPayload);
         },
     },
     {

@@ -1,6 +1,6 @@
-#include "payloads/channel-update-v1.hpp"
+#include "eventsub/payloads/channel-update-v1.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 

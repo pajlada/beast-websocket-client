@@ -1,6 +1,6 @@
-#include "payloads/stream-offline-v1.hpp"
+#include "eventsub/payloads/stream-offline-v1.hpp"
 
-#include "errors.hpp"
+#include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 

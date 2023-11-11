@@ -1,7 +1,7 @@
-#include "listener.hpp"
-#include "payloads/channel-ban-v1.hpp"
-#include "payloads/session-welcome.hpp"
-#include "session.hpp"
+#include "eventsub/listener.hpp"
+#include "eventsub/payloads/channel-ban-v1.hpp"
+#include "eventsub/payloads/session-welcome.hpp"
+#include "eventsub/session.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/as_tuple.hpp>
@@ -69,7 +69,14 @@ public:
     void onChannelBan(messages::Metadata metadata,
                       payload::channel_ban::v1::Payload payload) override
     {
-        std::cout << "ON CHANNEL BAN XD\n";
+        (void)metadata;
+        std::cout << "Channel ban occured in "
+                  << payload.event.broadcasterUserLogin << "'s channel:"
+                  << " isPermanent=" << payload.event.isPermanent
+                  << " reason=" << payload.event.reason
+                  << " userLogin=" << payload.event.userLogin
+                  << " moderatorLogin=" << payload.event.moderatorUserLogin
+                  << '\n';
     }
 
     void onStreamOnline(messages::Metadata metadata,
@@ -82,6 +89,13 @@ public:
                          payload::stream_offline::v1::Payload payload) override
     {
         std::cout << "ON STREAM OFFLINE XD\n";
+    }
+
+    void onChannelChatNotification(
+        messages::Metadata metadata,
+        payload::channel_chat_notification::beta::Payload payload) override
+    {
+        std::cout << "Received channel.chat.notification beta\n";
     }
 
     void onChannelUpdate(messages::Metadata metadata,
@@ -202,14 +216,14 @@ int main(int argc, char **argv)
         boost::asio::io_context ctx;
 
         // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
-        const auto *const host = "localhost";
-        const auto *const port = "3012";
-        const auto *const path = "/ws";
+        // const auto *const host = "localhost";
+        // const auto *const port = "3012";
+        // const auto *const path = "/ws";
 
         // for use with real Twitch eventsub
-        // const auto *const host = "eventsub.wss.twitch.tv";
-        // const auto *const port = "443";
-        // const auto *const path = "/ws";
+        const auto *const host = "eventsub.wss.twitch.tv";
+        const auto *const port = "443";
+        const auto *const path = "/ws";
 
         boost::asio::ssl::context sslContext{
             boost::asio::ssl::context::tlsv12_client};

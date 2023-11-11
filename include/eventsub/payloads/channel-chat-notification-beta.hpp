@@ -4,7 +4,9 @@
 
 #include <boost/json.hpp>
 
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace eventsub::payload::channel_chat_notification::beta {
 

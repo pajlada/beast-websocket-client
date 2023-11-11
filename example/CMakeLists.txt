@@ -25,12 +25,6 @@ function(set_target_directory_hierarchy TARGET)
     )
 endfunction()
 
-    target_link_libraries(${EXECUTABLE_PROJECT}
-        PUBLIC
-        OpenSSL::SSL
-        OpenSSL::Crypto
-        )
-
 set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
 target_include_directories(${EXECUTABLE_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

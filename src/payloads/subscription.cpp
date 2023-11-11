@@ -117,9 +117,7 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
             error_missing_field_transport{"Missing required key transport"};
         return boost::system::error_code{129, error_missing_field_transport};
     }
-    const auto transport =
-        boost::json::try_value_to<eventsub::payload::subscription::Transport>(
-            *jvtransport);
+    const auto transport = boost::json::try_value_to<Transport>(*jvtransport);
     if (transport.has_error())
     {
         return transport.error();

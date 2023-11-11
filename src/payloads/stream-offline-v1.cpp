@@ -104,9 +104,7 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
-    const auto event =
-        boost::json::try_value_to<eventsub::payload::stream_offline::v1::Event>(
-            *jvevent);
+    const auto event = boost::json::try_value_to<Event>(*jvevent);
     if (event.has_error())
     {
         return event.error();

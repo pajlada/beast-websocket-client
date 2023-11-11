@@ -201,9 +201,15 @@ int main(int argc, char **argv)
     {
         boost::asio::io_context ctx;
 
+        // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
         const auto *const host = "localhost";
         const auto *const port = "3012";
         const auto *const path = "/ws";
+
+        // for use with real Twitch eventsub
+        // const auto *const host = "eventsub.wss.twitch.tv";
+        // const auto *const port = "443";
+        // const auto *const path = "/ws";
 
         boost::asio::ssl::context sslContext{
             boost::asio::ssl::context::tlsv12_client};

@@ -64,7 +64,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
 
     std::optional<std::string> subscriptionType = std::nullopt;
     const auto *jvsubscriptionType = root.if_contains("subscription_type");
-    if (jvsubscriptionType != nullptr)
+    if (jvsubscriptionType != nullptr && !jvsubscriptionType->is_null())
     {
         const auto tsubscriptionType =
             boost::json::try_value_to<std::string>(*jvsubscriptionType);
@@ -79,7 +79,7 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
     std::optional<std::string> subscriptionVersion = std::nullopt;
     const auto *jvsubscriptionVersion =
         root.if_contains("subscription_version");
-    if (jvsubscriptionVersion != nullptr)
+    if (jvsubscriptionVersion != nullptr && !jvsubscriptionVersion->is_null())
     {
         const auto tsubscriptionVersion =
             boost::json::try_value_to<std::string>(*jvsubscriptionVersion);

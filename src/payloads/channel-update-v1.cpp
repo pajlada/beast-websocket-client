@@ -12,7 +12,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Event must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvRoot.get_object();
 
@@ -151,7 +153,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Payload must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvRoot.get_object();
 

@@ -12,7 +12,9 @@ boost::json::result_for<Transport, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Transport must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvRoot.get_object();
 
@@ -54,7 +56,9 @@ boost::json::result_for<Subscription, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Subscription must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvRoot.get_object();
 

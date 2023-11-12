@@ -12,18 +12,24 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 {
     if (!jvRoot.is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Payload must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &outerRoot = jvRoot.get_object();
 
     const auto *jvInnerRoot = outerRoot.if_contains("session");
     if (jvInnerRoot == nullptr)
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMissing{
+            "Payload's key session is missing"};
+        return boost::system::error_code{129, errorMissing};
     }
     if (!jvInnerRoot->is_object())
     {
-        return boost::system::error_code{129, error::EXPECTED_OBJECT};
+        static const error::ApplicationErrorCategory errorMustBeObject{
+            "Payload's session must be an object"};
+        return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvInnerRoot->get_object();
 

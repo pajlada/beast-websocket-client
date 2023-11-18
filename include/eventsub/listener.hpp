@@ -19,6 +19,9 @@ public:
         messages::Metadata metadata,
         payload::session_welcome::Payload payload) = 0;
 
+    virtual void onNotification(messages::Metadata metadata,
+                                const boost::json::value &jv) = 0;
+
     // Subscription types
     virtual void onChannelBan(messages::Metadata metadata,
                               payload::channel_ban::v1::Payload payload) = 0;

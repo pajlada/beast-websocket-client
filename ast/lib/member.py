@@ -33,6 +33,7 @@ class Member:
         self.json_name = name
         self.member_type = member_type
         self.type_name = type_name
+        self.tag: Optional[str] = None
 
         self.dont_fail_on_deserialization: bool = False
 
@@ -53,6 +54,10 @@ class Member:
                 case "json_inner":
                     # Do nothing on members
                     pass
+                case "json_tag":
+                    # Rename the key that this field will use in json terms
+                    log.debug(f"Applied json tag on {self.json_name}: {value}")
+                    self.tag = value
                 case other:
                     log.warning(f"Unknown comment command found: {other} with value {value}")
 

@@ -1,3 +1,6 @@
+{% if field.tag -%}
+static_assert(false && "JSON tag support is not implemented for vectors");
+{%- endif %}
 const auto *jv{{field.name}} = root.if_contains("{{field.json_name}}");
 if (jv{{field.name}} == nullptr)
 {

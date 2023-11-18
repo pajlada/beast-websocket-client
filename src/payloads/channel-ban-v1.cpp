@@ -1,10 +1,21 @@
 #include "eventsub/payloads/channel-ban-v1.hpp"
 
+#include "eventsub/chrono.hpp"
 #include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 
 namespace eventsub::payload::channel_ban::v1 {
+
+std::chrono::system_clock::duration Event::timeoutDuration() const
+{
+    if (!this->endsAt)
+    {
+        return {};
+    }
+
+    return *this->endsAt - this->bannedAt;
+}
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Event, boost::json::value>::type tag_invoke(
@@ -17,19 +28,6 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, errorMustBeObject};
     }
     const auto &root = jvRoot.get_object();
-
-    const auto *jvbannedAt = root.if_contains("banned_at");
-    if (jvbannedAt == nullptr)
-    {
-        static const error::ApplicationErrorCategory
-            error_missing_field_bannedAt{"Missing required key banned_at"};
-        return boost::system::error_code{129, error_missing_field_bannedAt};
-    }
-    const auto bannedAt = boost::json::try_value_to<std::string>(*jvbannedAt);
-    if (bannedAt.has_error())
-    {
-        return bannedAt.error();
-    }
 
     const auto *jvbroadcasterUserID = root.if_contains("broadcaster_user_id");
     if (jvbroadcasterUserID == nullptr)
@@ -78,38 +76,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserName};
     }
+
     const auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+
     if (broadcasterUserName.has_error())
     {
         return broadcasterUserName.error();
-    }
-
-    const auto *jvendsAt = root.if_contains("ends_at");
-    if (jvendsAt == nullptr)
-    {
-        static const error::ApplicationErrorCategory error_missing_field_endsAt{
-            "Missing required key ends_at"};
-        return boost::system::error_code{129, error_missing_field_endsAt};
-    }
-    const auto endsAt = boost::json::try_value_to<std::string>(*jvendsAt);
-    if (endsAt.has_error())
-    {
-        return endsAt.error();
-    }
-
-    const auto *jvisPermanent = root.if_contains("is_permanent");
-    if (jvisPermanent == nullptr)
-    {
-        static const error::ApplicationErrorCategory
-            error_missing_field_isPermanent{
-                "Missing required key is_permanent"};
-        return boost::system::error_code{129, error_missing_field_isPermanent};
-    }
-    const auto isPermanent = boost::json::try_value_to<bool>(*jvisPermanent);
-    if (isPermanent.has_error())
-    {
-        return isPermanent.error();
     }
 
     const auto *jvmoderatorUserID = root.if_contains("moderator_user_id");
@@ -121,8 +94,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_moderatorUserID};
     }
+
     const auto moderatorUserID =
         boost::json::try_value_to<std::string>(*jvmoderatorUserID);
+
     if (moderatorUserID.has_error())
     {
         return moderatorUserID.error();
@@ -137,8 +112,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_moderatorUserLogin};
     }
+
     const auto moderatorUserLogin =
         boost::json::try_value_to<std::string>(*jvmoderatorUserLogin);
+
     if (moderatorUserLogin.has_error())
     {
         return moderatorUserLogin.error();
@@ -153,24 +130,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_moderatorUserName};
     }
+
     const auto moderatorUserName =
         boost::json::try_value_to<std::string>(*jvmoderatorUserName);
+
     if (moderatorUserName.has_error())
     {
         return moderatorUserName.error();
-    }
-
-    const auto *jvreason = root.if_contains("reason");
-    if (jvreason == nullptr)
-    {
-        static const error::ApplicationErrorCategory error_missing_field_reason{
-            "Missing required key reason"};
-        return boost::system::error_code{129, error_missing_field_reason};
-    }
-    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
-    if (reason.has_error())
-    {
-        return reason.error();
     }
 
     const auto *jvuserID = root.if_contains("user_id");
@@ -180,7 +146,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             "Missing required key user_id"};
         return boost::system::error_code{129, error_missing_field_userID};
     }
+
     const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+
     if (userID.has_error())
     {
         return userID.error();
@@ -193,7 +161,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_userLogin{"Missing required key user_login"};
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
+
     const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+
     if (userLogin.has_error())
     {
         return userLogin.error();
@@ -206,26 +176,91 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_userName{"Missing required key user_name"};
         return boost::system::error_code{129, error_missing_field_userName};
     }
+
     const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+
     if (userName.has_error())
     {
         return userName.error();
     }
 
+    const auto *jvreason = root.if_contains("reason");
+    if (jvreason == nullptr)
+    {
+        static const error::ApplicationErrorCategory error_missing_field_reason{
+            "Missing required key reason"};
+        return boost::system::error_code{129, error_missing_field_reason};
+    }
+
+    const auto reason = boost::json::try_value_to<std::string>(*jvreason);
+
+    if (reason.has_error())
+    {
+        return reason.error();
+    }
+
+    const auto *jvisPermanent = root.if_contains("is_permanent");
+    if (jvisPermanent == nullptr)
+    {
+        static const error::ApplicationErrorCategory
+            error_missing_field_isPermanent{
+                "Missing required key is_permanent"};
+        return boost::system::error_code{129, error_missing_field_isPermanent};
+    }
+
+    const auto isPermanent = boost::json::try_value_to<bool>(*jvisPermanent);
+
+    if (isPermanent.has_error())
+    {
+        return isPermanent.error();
+    }
+
+    const auto *jvbannedAt = root.if_contains("banned_at");
+    if (jvbannedAt == nullptr)
+    {
+        static const error::ApplicationErrorCategory
+            error_missing_field_bannedAt{"Missing required key banned_at"};
+        return boost::system::error_code{129, error_missing_field_bannedAt};
+    }
+
+    const auto bannedAt =
+        boost::json::try_value_to<std::chrono::system_clock::time_point>(
+            *jvbannedAt, AsISO8601());
+
+    if (bannedAt.has_error())
+    {
+        return bannedAt.error();
+    }
+
+    std::optional<std::chrono::system_clock::time_point> endsAt = std::nullopt;
+    const auto *jvendsAt = root.if_contains("ends_at");
+    if (jvendsAt != nullptr && !jvendsAt->is_null())
+    {
+        const auto tendsAt =
+            boost::json::try_value_to<std::chrono::system_clock::time_point>(
+                *jvendsAt, AsISO8601());
+
+        if (tendsAt.has_error())
+        {
+            return tendsAt.error();
+        }
+        endsAt = tendsAt.value();
+    }
+
     return Event{
-        .bannedAt = bannedAt.value(),
         .broadcasterUserID = broadcasterUserID.value(),
         .broadcasterUserLogin = broadcasterUserLogin.value(),
         .broadcasterUserName = broadcasterUserName.value(),
-        .endsAt = endsAt.value(),
-        .isPermanent = isPermanent.value(),
         .moderatorUserID = moderatorUserID.value(),
         .moderatorUserLogin = moderatorUserLogin.value(),
         .moderatorUserName = moderatorUserName.value(),
-        .reason = reason.value(),
         .userID = userID.value(),
         .userLogin = userLogin.value(),
         .userName = userName.value(),
+        .reason = reason.value(),
+        .isPermanent = isPermanent.value(),
+        .bannedAt = bannedAt.value(),
+        .endsAt = endsAt,
     };
 }
 
@@ -248,8 +283,10 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
                 "Missing required key subscription"};
         return boost::system::error_code{129, error_missing_field_subscription};
     }
+
     const auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
+
     if (subscription.has_error())
     {
         return subscription.error();
@@ -262,7 +299,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
+
     const auto event = boost::json::try_value_to<Event>(*jvevent);
+
     if (event.has_error())
     {
         return event.error();

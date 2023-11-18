@@ -1,3 +1,4 @@
+#include "eventsub/chrono.hpp"
 #include "eventsub/listener.hpp"
 #include "eventsub/payloads/channel-ban-v1.hpp"
 #include "eventsub/payloads/session-welcome.hpp"
@@ -85,7 +86,7 @@ public:
                   << " reason=" << payload.event.reason
                   << " userLogin=" << payload.event.userLogin
                   << " moderatorLogin=" << payload.event.moderatorUserLogin
-                  << '\n';
+                  << " bannedAt=" << payload.event.bannedAt << '\n';
     }
 
     void onStreamOnline(messages::Metadata metadata,

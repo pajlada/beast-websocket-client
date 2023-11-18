@@ -154,6 +154,8 @@ const MessageHandlers MESSAGE_HANDLERS{
         "notification",
         [](const auto &metadata, const auto &jv, auto &listener,
            const auto &notificationHandlers) {
+            listener->onNotification(metadata, jv);
+
             if (!metadata.subscriptionType || !metadata.subscriptionVersion)
             {
                 // TODO: error handling
@@ -243,7 +245,7 @@ boost::asio::awaitable<void> sessionReader(WebSocketStream &ws,
         if (readError)
         {
             fail(readError, "read");
-            continue;
+            break;
         }
 
         boost::json::error_code ec;

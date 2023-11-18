@@ -29,6 +29,8 @@ set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
 
 target_include_directories(${EXECUTABLE_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+# target_compile_definitions(${EXECUTABLE_PROJECT} PRIVATE BOOST_ASIO_DISABLE_CONCEPTS)
+
 if (MSVC)
     target_compile_options(${EXECUTABLE_PROJECT} PUBLIC /EHsc /bigobj)
 endif ()

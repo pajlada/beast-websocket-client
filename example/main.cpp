@@ -4,7 +4,13 @@
 #include "eventsub/session.hpp"
 
 #include <boost/asio.hpp>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/signal_set.hpp>
+#include <boost/asio/write.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
@@ -21,14 +27,14 @@
 namespace beast = boost::beast;          // from <boost/beast.hpp>
 namespace http = beast::http;            // from <boost/beast/http.hpp>
 namespace websocket = beast::websocket;  // from <boost/beast/websocket.hpp>
-namespace net = boost::asio;             // from <boost/asio.hpp>
 namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
 
 using boost::asio::awaitable;
 using boost::asio::co_spawn;
 using boost::asio::detached;
+using boost::asio::use_awaitable;
 using boost::asio::ip::tcp;
-using namespace boost::asio::experimental::awaitable_operators;
+// using namespace boost::asio::experimental::awaitable_operators;
 using namespace std::literals::chrono_literals;
 
 using WebSocketStream = websocket::stream<beast::ssl_stream<beast::tcp_stream>>;
@@ -41,8 +47,7 @@ void fail(beast::error_code ec, char const *what)
     std::cerr << what << ": " << ec.message() << "\n";
 }
 
-awaitable<WebSocketStream> session(WebSocketStream &&ws,
-                                   std::unique_ptr<Listener> &&listener)
+awaitable<void> session(WebSocketStream &ws, std::unique_ptr<Listener> listener)
 {
     // start reader
     std::cout << "start reader\n";
@@ -50,7 +55,7 @@ awaitable<WebSocketStream> session(WebSocketStream &&ws,
     // co_spawn(ws.get_executor(), sessionReader(ws), detached);
     std::cout << "reader stopped\n";
 
-    co_return ws;
+    co_return;
 }
 
 class MyListener final : public Listener
@@ -59,7 +64,15 @@ public:
     void onSessionWelcome(messages::Metadata metadata,
                           payload::session_welcome::Payload payload) override
     {
+        (void)metadata;
         std::cout << "ON session welcome " << payload.id << " XD\n";
+    }
+
+    void onNotification(messages::Metadata metadata,
+                        const boost::json::value &jv) override
+    {
+        (void)metadata;
+        std::cout << "on notification: " << jv << '\n';
     }
 
     void onChannelBan(messages::Metadata metadata,
@@ -78,12 +91,16 @@ public:
     void onStreamOnline(messages::Metadata metadata,
                         payload::stream_online::v1::Payload payload) override
     {
+        (void)metadata;
+        (void)payload;
         std::cout << "ON STREAM ONLINE XD\n";
     }
 
     void onStreamOffline(messages::Metadata metadata,
                          payload::stream_offline::v1::Payload payload) override
     {
+        (void)metadata;
+        (void)payload;
         std::cout << "ON STREAM OFFLINE XD\n";
     }
 
@@ -91,17 +108,52 @@ public:
         messages::Metadata metadata,
         payload::channel_chat_notification::beta::Payload payload) override
     {
+        (void)metadata;
+        (void)payload;
         std::cout << "Received channel.chat.notification beta\n";
     }
 
     void onChannelUpdate(messages::Metadata metadata,
                          payload::channel_update::v1::Payload payload) override
     {
+        (void)metadata;
+        (void)payload;
         std::cout << "Channel update event!\n";
     }
 
     // Add your new subscription types above this line
 };
+
+awaitable<void> echo(tcp::socket socket)
+{
+    try
+    {
+        char data[1024];
+        for (;;)
+        {
+            std::size_t n = co_await socket.async_read_some(
+                boost::asio::buffer(data), use_awaitable);
+            co_await async_write(socket, boost::asio::buffer(data, n),
+                                 use_awaitable);
+        }
+    }
+    catch (std::exception &e)
+    {
+        std::printf("echo Exception: %s\n", e.what());
+    }
+}
+
+awaitable<void> listener()
+{
+    auto executor = co_await boost::asio::this_coro::executor;
+    tcp::acceptor acceptor(executor, {tcp::v4(), 55555});
+    for (;;)
+    {
+        tcp::socket socket =
+            co_await acceptor.async_accept(boost::asio::use_awaitable);
+        co_spawn(executor, echo(std::move(socket)), detached);
+    }
+}
 
 awaitable<void> connectToClient(boost::asio::io_context &ioContext,
                                 const std::string host, const std::string port,
@@ -136,11 +188,11 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
             target, boost::asio::redirect_error(boost::asio::use_awaitable,
                                                 connectError));
 
-        std::string hostHeader = host;
+        std::string hostHeader{host};
 
         // Set SNI Hostname (many hosts need this to handshake successfully)
         if (!SSL_set_tlsext_host_name(ws.next_layer().native_handle(),
-                                      host.c_str()))
+                                      host.data()))
         {
             auto ec = beast::error_code(static_cast<int>(::ERR_get_error()),
                                         boost::asio::error::get_ssl_category());
@@ -197,13 +249,13 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
         }
 
         std::unique_ptr<Listener> listener = std::make_unique<MyListener>();
-        auto ws2 = co_await session(std::move(ws), std::move(listener));
+        // co_await session(ws, std::move(listener));
 
         // Close the WebSocket connection
         boost::system::error_code closeError;
-        co_await ws2.async_close(websocket::close_code::normal,
-                                 boost::asio::redirect_error(
-                                     boost::asio::use_awaitable, closeError));
+        co_await ws.async_close(websocket::close_code::normal,
+                                boost::asio::redirect_error(
+                                    boost::asio::use_awaitable, closeError));
         if (closeError)
         {
             fail(closeError, "close");
@@ -220,19 +272,22 @@ awaitable<void> connectToClient(boost::asio::io_context &ioContext,
 
 int main(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
+
+    // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
+    // const auto *const host = "localhost";
+    // const auto *const port = "3012";
+    // const auto *const path = "/ws";
+
+    // for use with real Twitch eventsub
+    std::string host{"eventsub.wss.twitch.tv"};
+    std::string port("443");
+    std::string path("/ws");
+
     try
     {
-        boost::asio::io_context ctx;
-
-        // for use with twitch CLI: twitch event websocket start-server --ssl --port 3012
-        // const auto *const host = "localhost";
-        // const auto *const port = "3012";
-        // const auto *const path = "/ws";
-
-        // for use with real Twitch eventsub
-        const auto *const host = "eventsub.wss.twitch.tv";
-        const auto *const port = "443";
-        const auto *const path = "/ws";
+        boost::asio::io_context ctx(1);
 
         boost::asio::ssl::context sslContext{
             boost::asio::ssl::context::tlsv12_client};

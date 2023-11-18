@@ -18,7 +18,7 @@ set(SOURCE_FILES
 add_library(${PROJECT_NAME} OBJECT ${SOURCE_FILES})
 
 # Generate source groups for use in IDEs
-source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
+# source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
@@ -30,7 +30,8 @@ target_link_libraries(${PROJECT_NAME}
         OpenSSL::Crypto
         )
 
-
+# See https://github.com/boostorg/beast/issues/2661
+# target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_DISABLE_CONCEPTS)
 
 # Configure compiler warnings
 if (MSVC)

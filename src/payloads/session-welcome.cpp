@@ -40,7 +40,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key id"};
         return boost::system::error_code{129, error_missing_field_id};
     }
+
     const auto id = boost::json::try_value_to<std::string>(*jvid);
+
     if (id.has_error())
     {
         return id.error();

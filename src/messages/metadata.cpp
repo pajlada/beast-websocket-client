@@ -25,7 +25,9 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
             error_missing_field_messageID{"Missing required key message_id"};
         return boost::system::error_code{129, error_missing_field_messageID};
     }
+
     const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+
     if (messageID.has_error())
     {
         return messageID.error();
@@ -39,8 +41,10 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
                 "Missing required key message_type"};
         return boost::system::error_code{129, error_missing_field_messageType};
     }
+
     const auto messageType =
         boost::json::try_value_to<std::string>(*jvmessageType);
+
     if (messageType.has_error())
     {
         return messageType.error();
@@ -55,8 +59,10 @@ boost::json::result_for<Metadata, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_messageTimestamp};
     }
+
     const auto messageTimestamp =
         boost::json::try_value_to<std::string>(*jvmessageTimestamp);
+
     if (messageTimestamp.has_error())
     {
         return messageTimestamp.error();

@@ -1,10 +1,10 @@
-#include "eventsub/payloads/channel-chat-notification-beta.hpp"
+#include "eventsub/payloads/channel-chat-notification-v1.hpp"
 
 #include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_chat_notification::beta {
+namespace eventsub::payload::channel_chat_notification::v1 {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
@@ -25,7 +25,9 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
             "Missing required key set_id"};
         return boost::system::error_code{129, error_missing_field_setID};
     }
+
     const auto setID = boost::json::try_value_to<std::string>(*jvsetID);
+
     if (setID.has_error())
     {
         return setID.error();
@@ -38,7 +40,9 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
             "Missing required key id"};
         return boost::system::error_code{129, error_missing_field_id};
     }
+
     const auto id = boost::json::try_value_to<std::string>(*jvid);
+
     if (id.has_error())
     {
         return id.error();
@@ -51,7 +55,9 @@ boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
             "Missing required key info"};
         return boost::system::error_code{129, error_missing_field_info};
     }
+
     const auto info = boost::json::try_value_to<std::string>(*jvinfo);
+
     if (info.has_error())
     {
         return info.error();
@@ -82,7 +88,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
             "Missing required key prefix"};
         return boost::system::error_code{129, error_missing_field_prefix};
     }
+
     const auto prefix = boost::json::try_value_to<std::string>(*jvprefix);
+
     if (prefix.has_error())
     {
         return prefix.error();
@@ -95,7 +103,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
             "Missing required key bits"};
         return boost::system::error_code{129, error_missing_field_bits};
     }
+
     const auto bits = boost::json::try_value_to<int>(*jvbits);
+
     if (bits.has_error())
     {
         return bits.error();
@@ -108,7 +118,9 @@ boost::json::result_for<Cheermote, boost::json::value>::type tag_invoke(
             "Missing required key tier"};
         return boost::system::error_code{129, error_missing_field_tier};
     }
+
     const auto tier = boost::json::try_value_to<int>(*jvtier);
+
     if (tier.has_error())
     {
         return tier.error();
@@ -139,7 +151,9 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
             "Missing required key id"};
         return boost::system::error_code{129, error_missing_field_id};
     }
+
     const auto id = boost::json::try_value_to<std::string>(*jvid);
+
     if (id.has_error())
     {
         return id.error();
@@ -152,8 +166,10 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
             error_missing_field_emoteSetID{"Missing required key emote_set_id"};
         return boost::system::error_code{129, error_missing_field_emoteSetID};
     }
+
     const auto emoteSetID =
         boost::json::try_value_to<std::string>(*jvemoteSetID);
+
     if (emoteSetID.has_error())
     {
         return emoteSetID.error();
@@ -166,7 +182,9 @@ boost::json::result_for<Emote, boost::json::value>::type tag_invoke(
             error_missing_field_ownerID{"Missing required key owner_id"};
         return boost::system::error_code{129, error_missing_field_ownerID};
     }
+
     const auto ownerID = boost::json::try_value_to<std::string>(*jvownerID);
+
     if (ownerID.has_error())
     {
         return ownerID.error();
@@ -212,7 +230,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
             "Missing required key user_id"};
         return boost::system::error_code{129, error_missing_field_userID};
     }
+
     const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+
     if (userID.has_error())
     {
         return userID.error();
@@ -225,7 +245,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
             error_missing_field_userName{"Missing required key user_name"};
         return boost::system::error_code{129, error_missing_field_userName};
     }
+
     const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+
     if (userName.has_error())
     {
         return userName.error();
@@ -238,7 +260,9 @@ boost::json::result_for<Mention, boost::json::value>::type tag_invoke(
             error_missing_field_userLogin{"Missing required key user_login"};
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
+
     const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+
     if (userLogin.has_error())
     {
         return userLogin.error();
@@ -270,7 +294,9 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
             "Missing required key type"};
         return boost::system::error_code{129, error_missing_field_type};
     }
+
     const auto type = boost::json::try_value_to<std::string>(*jvtype);
+
     if (type.has_error())
     {
         return type.error();
@@ -283,19 +309,21 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
             "Missing required key text"};
         return boost::system::error_code{129, error_missing_field_text};
     }
+
     const auto text = boost::json::try_value_to<std::string>(*jvtext);
+
     if (text.has_error())
     {
         return text.error();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::Cheermote>
+    std::optional<eventsub::payload::channel_chat_notification::v1::Cheermote>
         cheermote = std::nullopt;
     const auto *jvcheermote = root.if_contains("cheermote");
     if (jvcheermote != nullptr && !jvcheermote->is_null())
     {
         const auto tcheermote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Cheermote>(
+            eventsub::payload::channel_chat_notification::v1::Cheermote>(
             *jvcheermote);
 
         if (tcheermote.has_error())
@@ -305,14 +333,13 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         cheermote = tcheermote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::Emote>
+    std::optional<eventsub::payload::channel_chat_notification::v1::Emote>
         emote = std::nullopt;
     const auto *jvemote = root.if_contains("emote");
     if (jvemote != nullptr && !jvemote->is_null())
     {
         const auto temote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Emote>(
-            *jvemote);
+            eventsub::payload::channel_chat_notification::v1::Emote>(*jvemote);
 
         if (temote.has_error())
         {
@@ -321,13 +348,13 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         emote = temote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::Mention>
+    std::optional<eventsub::payload::channel_chat_notification::v1::Mention>
         mention = std::nullopt;
     const auto *jvmention = root.if_contains("mention");
     if (jvmention != nullptr && !jvmention->is_null())
     {
         const auto tmention = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Mention>(
+            eventsub::payload::channel_chat_notification::v1::Mention>(
             *jvmention);
 
         if (tmention.has_error())
@@ -358,22 +385,6 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
     }
     const auto &root = jvRoot.get_object();
 
-    const auto *jvcumulativeMonths = root.if_contains("cumulative_months");
-    if (jvcumulativeMonths == nullptr)
-    {
-        static const error::ApplicationErrorCategory
-            error_missing_field_cumulativeMonths{
-                "Missing required key cumulative_months"};
-        return boost::system::error_code{129,
-                                         error_missing_field_cumulativeMonths};
-    }
-    const auto cumulativeMonths =
-        boost::json::try_value_to<int>(*jvcumulativeMonths);
-    if (cumulativeMonths.has_error())
-    {
-        return cumulativeMonths.error();
-    }
-
     const auto *jvsubTier = root.if_contains("sub_tier");
     if (jvsubTier == nullptr)
     {
@@ -381,7 +392,9 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
             error_missing_field_subTier{"Missing required key sub_tier"};
         return boost::system::error_code{129, error_missing_field_subTier};
     }
+
     const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+
     if (subTier.has_error())
     {
         return subTier.error();
@@ -394,7 +407,9 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
             error_missing_field_isPrime{"Missing required key is_prime"};
         return boost::system::error_code{129, error_missing_field_isPrime};
     }
+
     const auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
+
     if (isPrime.has_error())
     {
         return isPrime.error();
@@ -409,15 +424,16 @@ boost::json::result_for<Subcription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_durationMonths};
     }
+
     const auto durationMonths =
         boost::json::try_value_to<int>(*jvdurationMonths);
+
     if (durationMonths.has_error())
     {
         return durationMonths.error();
     }
 
     return Subcription{
-        .cumulativeMonths = cumulativeMonths.value(),
         .subTier = subTier.value(),
         .isPrime = isPrime.value(),
         .durationMonths = durationMonths.value(),
@@ -445,8 +461,10 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_cumulativeMonths};
     }
+
     const auto cumulativeMonths =
         boost::json::try_value_to<int>(*jvcumulativeMonths);
+
     if (cumulativeMonths.has_error())
     {
         return cumulativeMonths.error();
@@ -461,8 +479,10 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_durationMonths};
     }
+
     const auto durationMonths =
         boost::json::try_value_to<int>(*jvdurationMonths);
+
     if (durationMonths.has_error())
     {
         return durationMonths.error();
@@ -489,7 +509,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
             error_missing_field_subTier{"Missing required key sub_tier"};
         return boost::system::error_code{129, error_missing_field_subTier};
     }
+
     const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+
     if (subTier.has_error())
     {
         return subTier.error();
@@ -502,7 +524,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
             error_missing_field_isPrime{"Missing required key is_prime"};
         return boost::system::error_code{129, error_missing_field_isPrime};
     }
+
     const auto isPrime = boost::json::try_value_to<bool>(*jvisPrime);
+
     if (isPrime.has_error())
     {
         return isPrime.error();
@@ -515,7 +539,9 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
             "Missing required key is_gift"};
         return boost::system::error_code{129, error_missing_field_isGift};
     }
+
     const auto isGift = boost::json::try_value_to<bool>(*jvisGift);
+
     if (isGift.has_error())
     {
         return isGift.error();
@@ -530,8 +556,10 @@ boost::json::result_for<Resubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_gifterIsAnonymous};
     }
+
     const auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
+
     if (gifterIsAnonymous.has_error())
     {
         return gifterIsAnonymous.error();
@@ -614,8 +642,10 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_durationMonths};
     }
+
     const auto durationMonths =
         boost::json::try_value_to<int>(*jvdurationMonths);
+
     if (durationMonths.has_error())
     {
         return durationMonths.error();
@@ -658,8 +688,10 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_recipientUserID};
     }
+
     const auto recipientUserID =
         boost::json::try_value_to<std::string>(*jvrecipientUserID);
+
     if (recipientUserID.has_error())
     {
         return recipientUserID.error();
@@ -674,8 +706,10 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_recipientUserName};
     }
+
     const auto recipientUserName =
         boost::json::try_value_to<std::string>(*jvrecipientUserName);
+
     if (recipientUserName.has_error())
     {
         return recipientUserName.error();
@@ -690,8 +724,10 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_recipientUserLogin};
     }
+
     const auto recipientUserLogin =
         boost::json::try_value_to<std::string>(*jvrecipientUserLogin);
+
     if (recipientUserLogin.has_error())
     {
         return recipientUserLogin.error();
@@ -704,7 +740,9 @@ boost::json::result_for<GiftSubscription, boost::json::value>::type tag_invoke(
             error_missing_field_subTier{"Missing required key sub_tier"};
         return boost::system::error_code{129, error_missing_field_subTier};
     }
+
     const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+
     if (subTier.has_error())
     {
         return subTier.error();
@@ -755,7 +793,9 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
             "Missing required key id"};
         return boost::system::error_code{129, error_missing_field_id};
     }
+
     const auto id = boost::json::try_value_to<std::string>(*jvid);
+
     if (id.has_error())
     {
         return id.error();
@@ -768,7 +808,9 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
             "Missing required key total"};
         return boost::system::error_code{129, error_missing_field_total};
     }
+
     const auto total = boost::json::try_value_to<int>(*jvtotal);
+
     if (total.has_error())
     {
         return total.error();
@@ -781,7 +823,9 @@ boost::json::result_for<CommunityGiftSubscription, boost::json::value>::type
             error_missing_field_subTier{"Missing required key sub_tier"};
         return boost::system::error_code{129, error_missing_field_subTier};
     }
+
     const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+
     if (subTier.has_error())
     {
         return subTier.error();
@@ -830,8 +874,10 @@ boost::json::result_for<GiftPaidUpgrade, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_gifterIsAnonymous};
     }
+
     const auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
+
     if (gifterIsAnonymous.has_error())
     {
         return gifterIsAnonymous.error();
@@ -906,7 +952,9 @@ boost::json::result_for<PrimePaidUpgrade, boost::json::value>::type tag_invoke(
             error_missing_field_subTier{"Missing required key sub_tier"};
         return boost::system::error_code{129, error_missing_field_subTier};
     }
+
     const auto subTier = boost::json::try_value_to<std::string>(*jvsubTier);
+
     if (subTier.has_error())
     {
         return subTier.error();
@@ -935,7 +983,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
             "Missing required key user_id"};
         return boost::system::error_code{129, error_missing_field_userID};
     }
+
     const auto userID = boost::json::try_value_to<std::string>(*jvuserID);
+
     if (userID.has_error())
     {
         return userID.error();
@@ -948,7 +998,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
             error_missing_field_userName{"Missing required key user_name"};
         return boost::system::error_code{129, error_missing_field_userName};
     }
+
     const auto userName = boost::json::try_value_to<std::string>(*jvuserName);
+
     if (userName.has_error())
     {
         return userName.error();
@@ -961,7 +1013,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
             error_missing_field_userLogin{"Missing required key user_login"};
         return boost::system::error_code{129, error_missing_field_userLogin};
     }
+
     const auto userLogin = boost::json::try_value_to<std::string>(*jvuserLogin);
+
     if (userLogin.has_error())
     {
         return userLogin.error();
@@ -975,7 +1029,9 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
                 "Missing required key viewer_count"};
         return boost::system::error_code{129, error_missing_field_viewerCount};
     }
+
     const auto viewerCount = boost::json::try_value_to<int>(*jvviewerCount);
+
     if (viewerCount.has_error())
     {
         return viewerCount.error();
@@ -990,8 +1046,10 @@ boost::json::result_for<Raid, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_profileImageURL};
     }
+
     const auto profileImageURL =
         boost::json::try_value_to<std::string>(*jvprofileImageURL);
+
     if (profileImageURL.has_error())
     {
         return profileImageURL.error();
@@ -1041,8 +1099,10 @@ boost::json::result_for<PayItForward, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_gifterIsAnonymous};
     }
+
     const auto gifterIsAnonymous =
         boost::json::try_value_to<bool>(*jvgifterIsAnonymous);
+
     if (gifterIsAnonymous.has_error())
     {
         return gifterIsAnonymous.error();
@@ -1117,7 +1177,9 @@ boost::json::result_for<Announcement, boost::json::value>::type tag_invoke(
             "Missing required key color"};
         return boost::system::error_code{129, error_missing_field_color};
     }
+
     const auto color = boost::json::try_value_to<std::string>(*jvcolor);
+
     if (color.has_error())
     {
         return color.error();
@@ -1147,7 +1209,9 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
             "Missing required key value"};
         return boost::system::error_code{129, error_missing_field_value};
     }
+
     const auto value = boost::json::try_value_to<int>(*jvvalue);
+
     if (value.has_error())
     {
         return value.error();
@@ -1162,7 +1226,9 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
         return boost::system::error_code{129,
                                          error_missing_field_decimalPlaces};
     }
+
     const auto decimalPlaces = boost::json::try_value_to<int>(*jvdecimalPlaces);
+
     if (decimalPlaces.has_error())
     {
         return decimalPlaces.error();
@@ -1175,7 +1241,9 @@ boost::json::result_for<CharityDonationAmount, boost::json::value>::type
             error_missing_field_currency{"Missing required key currency"};
         return boost::system::error_code{129, error_missing_field_currency};
     }
+
     const auto currency = boost::json::try_value_to<std::string>(*jvcurrency);
+
     if (currency.has_error())
     {
         return currency.error();
@@ -1208,8 +1276,10 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
                 "Missing required key charity_name"};
         return boost::system::error_code{129, error_missing_field_charityName};
     }
+
     const auto charityName =
         boost::json::try_value_to<std::string>(*jvcharityName);
+
     if (charityName.has_error())
     {
         return charityName.error();
@@ -1222,8 +1292,10 @@ boost::json::result_for<CharityDonation, boost::json::value>::type tag_invoke(
             "Missing required key amount"};
         return boost::system::error_code{129, error_missing_field_amount};
     }
+
     const auto amount =
         boost::json::try_value_to<CharityDonationAmount>(*jvamount);
+
     if (amount.has_error())
     {
         return amount.error();
@@ -1254,7 +1326,9 @@ boost::json::result_for<BitsBadgeTier, boost::json::value>::type tag_invoke(
             "Missing required key tier"};
         return boost::system::error_code{129, error_missing_field_tier};
     }
+
     const auto tier = boost::json::try_value_to<int>(*jvtier);
+
     if (tier.has_error())
     {
         return tier.error();
@@ -1283,7 +1357,9 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
             "Missing required key text"};
         return boost::system::error_code{129, error_missing_field_text};
     }
+
     const auto text = boost::json::try_value_to<std::string>(*jvtext);
+
     if (text.has_error())
     {
         return text.error();
@@ -1297,7 +1373,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_fragments};
     }
     const auto fragments = boost::json::try_value_to<std::vector<
-        eventsub::payload::channel_chat_notification::beta::MessageFragment>>(
+        eventsub::payload::channel_chat_notification::v1::MessageFragment>>(
         *jvfragments);
     if (fragments.has_error())
     {
@@ -1330,8 +1406,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_broadcasterUserID};
     }
+
     const auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+
     if (broadcasterUserID.has_error())
     {
         return broadcasterUserID.error();
@@ -1347,8 +1425,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserLogin};
     }
+
     const auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+
     if (broadcasterUserLogin.has_error())
     {
         return broadcasterUserLogin.error();
@@ -1364,8 +1444,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserName};
     }
+
     const auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+
     if (broadcasterUserName.has_error())
     {
         return broadcasterUserName.error();
@@ -1380,8 +1462,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_chatterUserID};
     }
+
     const auto chatterUserID =
         boost::json::try_value_to<std::string>(*jvchatterUserID);
+
     if (chatterUserID.has_error())
     {
         return chatterUserID.error();
@@ -1396,8 +1480,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_chatterUserLogin};
     }
+
     const auto chatterUserLogin =
         boost::json::try_value_to<std::string>(*jvchatterUserLogin);
+
     if (chatterUserLogin.has_error())
     {
         return chatterUserLogin.error();
@@ -1412,8 +1498,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_chatterUserName};
     }
+
     const auto chatterUserName =
         boost::json::try_value_to<std::string>(*jvchatterUserName);
+
     if (chatterUserName.has_error())
     {
         return chatterUserName.error();
@@ -1428,8 +1516,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_chatterIsAnonymous};
     }
+
     const auto chatterIsAnonymous =
         boost::json::try_value_to<bool>(*jvchatterIsAnonymous);
+
     if (chatterIsAnonymous.has_error())
     {
         return chatterIsAnonymous.error();
@@ -1442,7 +1532,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             "Missing required key color"};
         return boost::system::error_code{129, error_missing_field_color};
     }
+
     const auto color = boost::json::try_value_to<std::string>(*jvcolor);
+
     if (color.has_error())
     {
         return color.error();
@@ -1456,7 +1548,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_badges};
     }
     const auto badges = boost::json::try_value_to<
-        std::vector<eventsub::payload::channel_chat_notification::beta::Badge>>(
+        std::vector<eventsub::payload::channel_chat_notification::v1::Badge>>(
         *jvbadges);
     if (badges.has_error())
     {
@@ -1472,8 +1564,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_systemMessage};
     }
+
     const auto systemMessage =
         boost::json::try_value_to<std::string>(*jvsystemMessage);
+
     if (systemMessage.has_error())
     {
         return systemMessage.error();
@@ -1486,7 +1580,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_messageID{"Missing required key message_id"};
         return boost::system::error_code{129, error_missing_field_messageID};
     }
+
     const auto messageID = boost::json::try_value_to<std::string>(*jvmessageID);
+
     if (messageID.has_error())
     {
         return messageID.error();
@@ -1499,7 +1595,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_message{"Missing required key message"};
         return boost::system::error_code{129, error_missing_field_message};
     }
+
     const auto message = boost::json::try_value_to<Message>(*jvmessage);
+
     if (message.has_error())
     {
         return message.error();
@@ -1512,21 +1610,22 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_noticeType{"Missing required key notice_type"};
         return boost::system::error_code{129, error_missing_field_noticeType};
     }
+
     const auto noticeType =
         boost::json::try_value_to<std::string>(*jvnoticeType);
+
     if (noticeType.has_error())
     {
         return noticeType.error();
     }
 
-    std::optional<
-        eventsub::payload::channel_chat_notification::beta::Subcription>
+    std::optional<eventsub::payload::channel_chat_notification::v1::Subcription>
         sub = std::nullopt;
     const auto *jvsub = root.if_contains("sub");
     if (jvsub != nullptr && !jvsub->is_null())
     {
         const auto tsub = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Subcription>(
+            eventsub::payload::channel_chat_notification::v1::Subcription>(
             *jvsub);
 
         if (tsub.has_error())
@@ -1537,13 +1636,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::Resubscription>
+        eventsub::payload::channel_chat_notification::v1::Resubscription>
         resub = std::nullopt;
     const auto *jvresub = root.if_contains("resub");
     if (jvresub != nullptr && !jvresub->is_null())
     {
         const auto tresub = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Resubscription>(
+            eventsub::payload::channel_chat_notification::v1::Resubscription>(
             *jvresub);
 
         if (tresub.has_error())
@@ -1554,14 +1653,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::GiftSubscription>
+        eventsub::payload::channel_chat_notification::v1::GiftSubscription>
         subGift = std::nullopt;
     const auto *jvsubGift = root.if_contains("sub_gift");
     if (jvsubGift != nullptr && !jvsubGift->is_null())
     {
         const auto tsubGift = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::
-                GiftSubscription>(*jvsubGift);
+            eventsub::payload::channel_chat_notification::v1::GiftSubscription>(
+            *jvsubGift);
 
         if (tsubGift.has_error())
         {
@@ -1570,14 +1669,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         subGift = tsubGift.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::
+    std::optional<eventsub::payload::channel_chat_notification::v1::
                       CommunityGiftSubscription>
         communitySubGift = std::nullopt;
     const auto *jvcommunitySubGift = root.if_contains("community_sub_gift");
     if (jvcommunitySubGift != nullptr && !jvcommunitySubGift->is_null())
     {
         const auto tcommunitySubGift = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::
+            eventsub::payload::channel_chat_notification::v1::
                 CommunityGiftSubscription>(*jvcommunitySubGift);
 
         if (tcommunitySubGift.has_error())
@@ -1588,14 +1687,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::GiftPaidUpgrade>
+        eventsub::payload::channel_chat_notification::v1::GiftPaidUpgrade>
         giftPaidUpgrade = std::nullopt;
     const auto *jvgiftPaidUpgrade = root.if_contains("gift_paid_upgrade");
     if (jvgiftPaidUpgrade != nullptr && !jvgiftPaidUpgrade->is_null())
     {
         const auto tgiftPaidUpgrade = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::
-                GiftPaidUpgrade>(*jvgiftPaidUpgrade);
+            eventsub::payload::channel_chat_notification::v1::GiftPaidUpgrade>(
+            *jvgiftPaidUpgrade);
 
         if (tgiftPaidUpgrade.has_error())
         {
@@ -1605,14 +1704,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::PrimePaidUpgrade>
+        eventsub::payload::channel_chat_notification::v1::PrimePaidUpgrade>
         primePaidUpgrade = std::nullopt;
     const auto *jvprimePaidUpgrade = root.if_contains("prime_paid_upgrade");
     if (jvprimePaidUpgrade != nullptr && !jvprimePaidUpgrade->is_null())
     {
         const auto tprimePaidUpgrade = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::
-                PrimePaidUpgrade>(*jvprimePaidUpgrade);
+            eventsub::payload::channel_chat_notification::v1::PrimePaidUpgrade>(
+            *jvprimePaidUpgrade);
 
         if (tprimePaidUpgrade.has_error())
         {
@@ -1621,13 +1720,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         primePaidUpgrade = tprimePaidUpgrade.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::Raid>
-        raid = std::nullopt;
+    std::optional<eventsub::payload::channel_chat_notification::v1::Raid> raid =
+        std::nullopt;
     const auto *jvraid = root.if_contains("raid");
     if (jvraid != nullptr && !jvraid->is_null())
     {
         const auto traid = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Raid>(*jvraid);
+            eventsub::payload::channel_chat_notification::v1::Raid>(*jvraid);
 
         if (traid.has_error())
         {
@@ -1636,13 +1735,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         raid = traid.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_notification::beta::Unraid>
+    std::optional<eventsub::payload::channel_chat_notification::v1::Unraid>
         unraid = std::nullopt;
     const auto *jvunraid = root.if_contains("unraid");
     if (jvunraid != nullptr && !jvunraid->is_null())
     {
         const auto tunraid = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Unraid>(
+            eventsub::payload::channel_chat_notification::v1::Unraid>(
             *jvunraid);
 
         if (tunraid.has_error())
@@ -1653,13 +1752,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::PayItForward>
+        eventsub::payload::channel_chat_notification::v1::PayItForward>
         payItForward = std::nullopt;
     const auto *jvpayItForward = root.if_contains("pay_it_forward");
     if (jvpayItForward != nullptr && !jvpayItForward->is_null())
     {
         const auto tpayItForward = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::PayItForward>(
+            eventsub::payload::channel_chat_notification::v1::PayItForward>(
             *jvpayItForward);
 
         if (tpayItForward.has_error())
@@ -1670,13 +1769,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::Announcement>
+        eventsub::payload::channel_chat_notification::v1::Announcement>
         announcement = std::nullopt;
     const auto *jvannouncement = root.if_contains("announcement");
     if (jvannouncement != nullptr && !jvannouncement->is_null())
     {
         const auto tannouncement = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::Announcement>(
+            eventsub::payload::channel_chat_notification::v1::Announcement>(
             *jvannouncement);
 
         if (tannouncement.has_error())
@@ -1687,14 +1786,14 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::CharityDonation>
+        eventsub::payload::channel_chat_notification::v1::CharityDonation>
         charityDonation = std::nullopt;
     const auto *jvcharityDonation = root.if_contains("charity_donation");
     if (jvcharityDonation != nullptr && !jvcharityDonation->is_null())
     {
         const auto tcharityDonation = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::
-                CharityDonation>(*jvcharityDonation);
+            eventsub::payload::channel_chat_notification::v1::CharityDonation>(
+            *jvcharityDonation);
 
         if (tcharityDonation.has_error())
         {
@@ -1704,13 +1803,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
     }
 
     std::optional<
-        eventsub::payload::channel_chat_notification::beta::BitsBadgeTier>
+        eventsub::payload::channel_chat_notification::v1::BitsBadgeTier>
         bitsBadgeTier = std::nullopt;
     const auto *jvbitsBadgeTier = root.if_contains("bits_badge_tier");
     if (jvbitsBadgeTier != nullptr && !jvbitsBadgeTier->is_null())
     {
         const auto tbitsBadgeTier = boost::json::try_value_to<
-            eventsub::payload::channel_chat_notification::beta::BitsBadgeTier>(
+            eventsub::payload::channel_chat_notification::v1::BitsBadgeTier>(
             *jvbitsBadgeTier);
 
         if (tbitsBadgeTier.has_error())
@@ -1768,8 +1867,10 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
                 "Missing required key subscription"};
         return boost::system::error_code{129, error_missing_field_subscription};
     }
+
     const auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
+
     if (subscription.has_error())
     {
         return subscription.error();
@@ -1782,7 +1883,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
+
     const auto event = boost::json::try_value_to<Event>(*jvevent);
+
     if (event.has_error())
     {
         return event.error();
@@ -1795,4 +1898,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_chat_notification::beta
+}  // namespace eventsub::payload::channel_chat_notification::v1

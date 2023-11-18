@@ -40,8 +40,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_broadcasterUserID};
     }
+
     const auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+
     if (broadcasterUserID.has_error())
     {
         return broadcasterUserID.error();
@@ -57,8 +59,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserLogin};
     }
+
     const auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+
     if (broadcasterUserLogin.has_error())
     {
         return broadcasterUserLogin.error();

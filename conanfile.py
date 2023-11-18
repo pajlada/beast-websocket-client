@@ -50,7 +50,7 @@ BOOST_DISABLED_OPTIONS = [opt for opt in BOOST_ALL_OPTIONS if opt not in BOOST_E
 class Eventsub(ConanFile):
     name = "Eventsub"
     requires = [
-        "boost/[~1.81]",
+        "boost/[~1.83]",
         "openssl/[~3]",
     ]
     settings = "os", "compiler", "build_type", "arch"

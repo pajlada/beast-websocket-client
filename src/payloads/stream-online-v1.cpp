@@ -25,7 +25,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             "Missing required key id"};
         return boost::system::error_code{129, error_missing_field_id};
     }
+
     const auto id = boost::json::try_value_to<std::string>(*jvid);
+
     if (id.has_error())
     {
         return id.error();
@@ -40,8 +42,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129,
                                          error_missing_field_broadcasterUserID};
     }
+
     const auto broadcasterUserID =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserID);
+
     if (broadcasterUserID.has_error())
     {
         return broadcasterUserID.error();
@@ -57,8 +61,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserLogin};
     }
+
     const auto broadcasterUserLogin =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserLogin);
+
     if (broadcasterUserLogin.has_error())
     {
         return broadcasterUserLogin.error();
@@ -74,8 +80,10 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{
             129, error_missing_field_broadcasterUserName};
     }
+
     const auto broadcasterUserName =
         boost::json::try_value_to<std::string>(*jvbroadcasterUserName);
+
     if (broadcasterUserName.has_error())
     {
         return broadcasterUserName.error();
@@ -88,7 +96,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             "Missing required key type"};
         return boost::system::error_code{129, error_missing_field_type};
     }
+
     const auto type = boost::json::try_value_to<std::string>(*jvtype);
+
     if (type.has_error())
     {
         return type.error();
@@ -101,7 +111,9 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
             error_missing_field_startedAt{"Missing required key started_at"};
         return boost::system::error_code{129, error_missing_field_startedAt};
     }
+
     const auto startedAt = boost::json::try_value_to<std::string>(*jvstartedAt);
+
     if (startedAt.has_error())
     {
         return startedAt.error();
@@ -136,8 +148,10 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
                 "Missing required key subscription"};
         return boost::system::error_code{129, error_missing_field_subscription};
     }
+
     const auto subscription =
         boost::json::try_value_to<subscription::Subscription>(*jvsubscription);
+
     if (subscription.has_error())
     {
         return subscription.error();
@@ -150,7 +164,9 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
             "Missing required key event"};
         return boost::system::error_code{129, error_missing_field_event};
     }
+
     const auto event = boost::json::try_value_to<Event>(*jvevent);
+
     if (event.has_error())
     {
         return event.error();

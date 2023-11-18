@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-namespace eventsub::payload::channel_chat_notification::beta {
+namespace eventsub::payload::channel_chat_notification::v1 {
 
 /// json_transform=snake_case
 struct Badge {
@@ -50,7 +50,6 @@ struct MessageFragment {
 
 /// json_transform=snake_case
 struct Subcription {
-    int cumulativeMonths;
     std::string subTier;
     bool isPrime;
     int durationMonths;
@@ -265,4 +264,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::channel_chat_notification::beta
+}  // namespace eventsub::payload::channel_chat_notification::v1

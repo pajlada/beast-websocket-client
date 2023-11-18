@@ -106,11 +106,11 @@ public:
 
     void onChannelChatNotification(
         messages::Metadata metadata,
-        payload::channel_chat_notification::beta::Payload payload) override
+        payload::channel_chat_notification::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;
-        std::cout << "Received channel.chat.notification beta\n";
+        std::cout << "Received channel.chat.notification v1\n";
     }
 
     void onChannelUpdate(messages::Metadata metadata,

@@ -4,6 +4,7 @@
 
 #include <boost/json.hpp>
 
+#include <chrono>
 #include <string>
 
 namespace eventsub::payload::channel_ban::v1 {
@@ -48,20 +49,46 @@ namespace eventsub::payload::channel_ban::v1 {
 
 /// json_transform=snake_case
 struct Event {
-    const std::string bannedAt;
-    const std::string broadcasterUserID;
-    const std::string broadcasterUserLogin;
-    const std::string broadcasterUserName;
-    // TODO: chronofy?
-    const std::string endsAt;
-    const bool isPermanent;
-    const std::string moderatorUserID;
-    const std::string moderatorUserLogin;
-    const std::string moderatorUserName;
-    const std::string reason;
-    const std::string userID;
-    const std::string userLogin;
-    const std::string userName;
+    // User ID (e.g. 117166826) of the user who's channel the event took place in
+    std::string broadcasterUserID;
+    // User Login (e.g. testaccount_420) of the user who's channel the event took place in
+    std::string broadcasterUserLogin;
+    // User Name (e.g. 테스트계정420) of the user who's channel the event took place in
+    std::string broadcasterUserName;
+
+    // User ID (e.g. 117166826) of the user who took the action
+    std::string moderatorUserID;
+    // User Login (e.g. testaccount_420) of the user who took the action
+    std::string moderatorUserLogin;
+    // User Name (e.g. 테스트계정420) of the user who took the action
+    std::string moderatorUserName;
+
+    // User ID (e.g. 117166826) of the user who was timed out or banned
+    std::string userID;
+    // User Login (e.g. testaccount_420) of the user who was timed out or banned
+    std::string userLogin;
+    // User Name (e.g. 테스트계정420) of the user who was timed out or banned
+    std::string userName;
+
+    // Reason given for the timeout or ban.
+    // If no reason was specified, this string is empty
+    std::string reason;
+
+    // Set to true if this was a ban.
+    // If this is false, this event describes a timeout
+    bool isPermanent;
+
+    // Time point when the timeout or ban took place
+    /// json_tag=AsISO8601
+    std::chrono::system_clock::time_point bannedAt;
+
+    // Time point when the timeout will end
+    /// json_tag=AsISO8601
+    std::optional<std::chrono::system_clock::time_point> endsAt;
+
+    // Returns the duration of the timeout
+    // If this event describes a ban, the value returned won't make sense
+    std::chrono::system_clock::duration timeoutDuration() const;
 };
 
 struct Payload {

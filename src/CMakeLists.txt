@@ -1,6 +1,8 @@
 set(SOURCE_FILES
     session.cpp
 
+    chrono.cpp
+
     payloads/subscription.cpp
     payloads/session-welcome.cpp
 

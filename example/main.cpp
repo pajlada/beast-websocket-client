@@ -86,7 +86,7 @@ public:
                   << " reason=" << payload.event.reason
                   << " userLogin=" << payload.event.userLogin
                   << " moderatorLogin=" << payload.event.moderatorUserLogin
-                  << " bannedAt=" << payload.event.bannedAt << '\n';
+                  << '\n';
     }
 
     void onStreamOnline(messages::Metadata metadata,

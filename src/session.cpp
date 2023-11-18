@@ -126,6 +126,18 @@ const NotificationHandlers NOTIFICATION_HANDLERS{
             listener->onChannelUpdate(metadata, *oPayload);
         },
     },
+    {
+        {"channel.chat.message", "beta"},
+        [](const auto &metadata, const auto &jv, auto &listener) {
+            auto oPayload = parsePayload<
+                eventsub::payload::channel_chat_message::beta::Payload>(jv);
+            if (!oPayload)
+            {
+                return;
+            }
+            listener->onChannelChatMessage(metadata, *oPayload);
+        },
+    },
     // Add your new subscription types above this line
 };
 

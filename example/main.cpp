@@ -73,6 +73,15 @@ public:
         std::cout << "Channel update event!\n";
     }
 
+    void onChannelChatMessage(
+        messages::Metadata metadata,
+        payload::channel_chat_message::beta::Payload payload) override
+    {
+        (void)metadata;
+        (void)payload;
+        std::cout << "Channel chat message event!\n";
+    }
+
     // Add your new subscription types above this line
 };
 

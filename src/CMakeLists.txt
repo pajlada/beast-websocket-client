@@ -35,8 +35,10 @@ target_link_libraries(${PROJECT_NAME}
 # See https://github.com/boostorg/beast/issues/2661
 target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_DISABLE_CONCEPTS)
 
-# Configure compiler warnings
 if (MSVC)
+    # Add bigobj
+    target_compile_options(${PROJECT_NAME} PRIVATE /EHsc /bigobj)
+
     # Change flags for RelWithDebInfo
 
     # Default: "/debug /INCREMENTAL"

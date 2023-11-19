@@ -24,14 +24,14 @@ boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
 // Sends a WebSocket message and prints the response
 class Session : public std::enable_shared_from_this<Session>
 {
-    boost::asio::ip::tcp::resolver resolver_;
+    boost::asio::ip::tcp::resolver resolver;
     boost::beast::websocket::stream<
         boost::beast::ssl_stream<boost::beast::tcp_stream>>
-        ws_;
-    boost::beast::flat_buffer buffer_;
-    std::string host_;
-    std::string port_;
-    std::string path_;
+        ws;
+    boost::beast::flat_buffer buffer;
+    std::string host;
+    std::string port;
+    std::string path;
     std::string userAgent;
     std::unique_ptr<Listener> listener;
 
@@ -42,9 +42,10 @@ public:
                      std::unique_ptr<Listener> listener);
 
     // Start the asynchronous operation
-    void run(std::string host, std::string port, std::string path,
+    void run(std::string _host, std::string _port, std::string _path,
              std::string _userAgent);
 
+private:
     void onResolve(boost::beast::error_code ec,
                    boost::asio::ip::tcp::resolver::results_type results);
 

@@ -246,25 +246,25 @@ boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
 // Resolver and socket require an io_context
 Session::Session(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
                  std::unique_ptr<Listener> listener)
-    : resolver_(boost::asio::make_strand(ioc))
-    , ws_(boost::asio::make_strand(ioc), ctx)
+    : resolver(boost::asio::make_strand(ioc))
+    , ws(boost::asio::make_strand(ioc), ctx)
     , listener(std::move(listener))
 {
 }
 
 // Start the asynchronous operation
-void Session::run(std::string host, std::string port, std::string path,
+void Session::run(std::string _host, std::string _port, std::string _path,
                   std::string _userAgent)
 {
     // Save these for later
-    this->host_ = std::move(host);
-    this->port_ = std::move(port);
-    this->path_ = std::move(path);
+    this->host = std::move(_host);
+    this->port = std::move(_port);
+    this->path = std::move(_path);
     this->userAgent = std::move(_userAgent);
 
     // Look up the domain name
-    this->resolver_.async_resolve(
-        this->host_, this->port_,
+    this->resolver.async_resolve(
+        this->host, this->port,
         beast::bind_front_handler(&Session::onResolve, shared_from_this()));
 }
 
@@ -277,10 +277,10 @@ void Session::onResolve(beast::error_code ec,
     }
 
     // Set a timeout on the operation
-    beast::get_lowest_layer(this->ws_).expires_after(std::chrono::seconds(30));
+    beast::get_lowest_layer(this->ws).expires_after(std::chrono::seconds(30));
 
     // Make the connection on the IP address we get from a lookup
-    beast::get_lowest_layer(this->ws_).async_connect(
+    beast::get_lowest_layer(this->ws).async_connect(
         results,
         beast::bind_front_handler(&Session::onConnect, shared_from_this()));
 }
@@ -295,11 +295,11 @@ void Session::onConnect(
     }
 
     // Set a timeout on the operation
-    beast::get_lowest_layer(this->ws_).expires_after(std::chrono::seconds(30));
+    beast::get_lowest_layer(this->ws).expires_after(std::chrono::seconds(30));
 
     // Set SNI Hostname (many hosts need this to handshake successfully)
-    if (!SSL_set_tlsext_host_name(this->ws_.next_layer().native_handle(),
-                                  this->host_.c_str()))
+    if (!SSL_set_tlsext_host_name(this->ws.next_layer().native_handle(),
+                                  this->host.c_str()))
     {
         ec = beast::error_code(static_cast<int>(::ERR_get_error()),
                                boost::asio::error::get_ssl_category());
@@ -309,10 +309,10 @@ void Session::onConnect(
     // Update the host_ string. This will provide the value of the
     // Host HTTP header during the WebSocket handshake.
     // See https://tools.ietf.org/html/rfc7230#section-5.4
-    host_ += ':' + std::to_string(ep.port());
+    host += ':' + std::to_string(ep.port());
 
     // Perform the SSL handshake
-    this->ws_.next_layer().async_handshake(
+    this->ws.next_layer().async_handshake(
         boost::asio::ssl::stream_base::client,
         beast::bind_front_handler(&Session::onSSLHandshake,
                                   shared_from_this()));
@@ -327,21 +327,21 @@ void Session::onSSLHandshake(beast::error_code ec)
 
     // Turn off the timeout on the tcp_stream, because
     // the websocket stream has its own timeout system.
-    beast::get_lowest_layer(this->ws_).expires_never();
+    beast::get_lowest_layer(this->ws).expires_never();
 
     // Set suggested timeout settings for the websocket
-    this->ws_.set_option(
+    this->ws.set_option(
         websocket::stream_base::timeout::suggested(beast::role_type::client));
 
     // Set a decorator to change the User-Agent of the handshake
-    this->ws_.set_option(websocket::stream_base::decorator(
+    this->ws.set_option(websocket::stream_base::decorator(
         [userAgent{this->userAgent}](websocket::request_type &req) {
             req.set(http::field::user_agent, userAgent);
         }));
 
     // Perform the websocket handshake
-    this->ws_.async_handshake(
-        this->host_, this->path_,
+    this->ws.async_handshake(
+        this->host, this->path,
         beast::bind_front_handler(&Session::onHandshake, shared_from_this()));
 }
 
@@ -352,8 +352,8 @@ void Session::onHandshake(beast::error_code ec)
         return fail(ec, "handshake");
     }
 
-    this->ws_.async_read(buffer_, beast::bind_front_handler(
-                                      &Session::onRead, shared_from_this()));
+    this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
+                                                          shared_from_this()));
 }
 
 void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
@@ -365,16 +365,16 @@ void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
         return fail(ec, "read");
     }
 
-    auto messageError = handleMessage(this->listener, this->buffer_);
+    auto messageError = handleMessage(this->listener, this->buffer);
     if (messageError)
     {
         return fail(messageError, "handleMessage");
     }
 
-    this->buffer_.clear();
+    this->buffer.clear();
 
-    this->ws_.async_read(buffer_, beast::bind_front_handler(
-                                      &Session::onRead, shared_from_this()));
+    this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
+                                                          shared_from_this()));
 }
 
 /**
@@ -392,7 +392,7 @@ void Session::onClose(beast::error_code ec)
     // If we get here then the connection is closed gracefully
 
     // The make_printable() function helps print a ConstBufferSequence
-    std::cout << beast::make_printable(buffer_.data()) << std::endl;
+    std::cout << beast::make_printable(buffer.data()) << std::endl;
 }
 
 }  // namespace eventsub

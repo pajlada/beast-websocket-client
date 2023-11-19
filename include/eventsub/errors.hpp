@@ -16,6 +16,11 @@ public:
     {
     }
 
+    explicit ApplicationErrorCategory(std::string _innerMessage)
+        : innerMessage(std::move(_innerMessage))
+    {
+    }
+
     const char *name() const noexcept override
     {
         return "Application JSON error";

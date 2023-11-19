@@ -18,9 +18,12 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <unordered_map>
 
-namespace beast = boost::beast;  // from <boost/beast.hpp>
+namespace beast = boost::beast;
+namespace http = beast::http;
+namespace websocket = beast::websocket;
 
 namespace eventsub {
 
@@ -174,36 +177,41 @@ const MessageHandlers MESSAGE_HANDLERS{
     },
 };
 
-void handleMessage(std::unique_ptr<Listener> &listener,
-                   const beast::flat_buffer &buffer,
-                   boost::json::error_code &ec)
+}  // namespace
+
+boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
+                                      const beast::flat_buffer &buffer)
 {
-    auto jv = boost::json::parse(beast::buffers_to_string(buffer.data()), ec);
-    if (ec)
+    boost::json::error_code parseError;
+    auto jv =
+        boost::json::parse(beast::buffers_to_string(buffer.data()), parseError);
+    if (parseError)
     {
         // TODO: wrap error?
-        return;
+        return parseError;
     }
 
     const auto *jvObject = jv.if_object();
     if (jvObject == nullptr)
     {
-        // TODO: set error
-        return;
+        static const error::ApplicationErrorCategory errorRootMustBeObject{
+            "Payload root must be an object"};
+        return boost::system::error_code{129, errorRootMustBeObject};
     }
 
     const auto *metadataV = jvObject->if_contains("metadata");
     if (metadataV == nullptr)
     {
-        // TODO: set error
-        return;
+        static const error::ApplicationErrorCategory
+            errorRootMustContainMetadata{
+                "Payload root must contain a metadata field"};
+        return boost::system::error_code{129, errorRootMustContainMetadata};
     }
     auto metadataResult = try_value_to<messages::Metadata>(*metadataV);
     if (metadataResult.has_error())
     {
-        // TODO: wrap error
-        ec = metadataResult.error();
-        return;
+        // TODO: wrap error?
+        return metadataResult.error();
     }
 
     const auto &metadata = metadataResult.value();
@@ -212,48 +220,179 @@ void handleMessage(std::unique_ptr<Listener> &listener,
 
     if (handler == MESSAGE_HANDLERS.end())
     {
-        // TODO: set error
-        return;
+        std::stringstream ss;
+        ss << "No message handler found for message type: ";
+        ss << metadata.messageType;
+        error::ApplicationErrorCategory errorNoMessageHandlerForMessageType{
+            ss.str()};
+        return boost::system::error_code{129,
+                                         errorNoMessageHandlerForMessageType};
     }
 
     const auto *payloadV = jvObject->if_contains("payload");
     if (payloadV == nullptr)
     {
-        // TODO: set error
-        return;
+        static const error::ApplicationErrorCategory
+            errorRootMustContainPayload{
+                "Payload root must contain a payload field"};
+        return boost::system::error_code{129, errorRootMustContainPayload};
     }
 
     handler->second(metadata, *payloadV, listener, NOTIFICATION_HANDLERS);
+
+    return {};
 }
 
-}  // namespace
-
-boost::asio::awaitable<void> sessionReader(WebSocketStream &ws,
-                                           std::unique_ptr<Listener> listener)
+// Resolver and socket require an io_context
+Session::Session(boost::asio::io_context &ioc, boost::asio::ssl::context &ctx,
+                 std::unique_ptr<Listener> listener)
+    : resolver(boost::asio::make_strand(ioc))
+    , ws(boost::asio::make_strand(ioc), ctx)
+    , listener(std::move(listener))
 {
-    for (;;)
+}
+
+// Start the asynchronous operation
+void Session::run(std::string _host, std::string _port, std::string _path,
+                  std::string _userAgent)
+{
+    // Save these for later
+    this->host = std::move(_host);
+    this->port = std::move(_port);
+    this->path = std::move(_path);
+    this->userAgent = std::move(_userAgent);
+
+    // Look up the domain name
+    this->resolver.async_resolve(
+        this->host, this->port,
+        beast::bind_front_handler(&Session::onResolve, shared_from_this()));
+}
+
+void Session::onResolve(beast::error_code ec,
+                        boost::asio::ip::tcp::resolver::results_type results)
+{
+    if (ec)
     {
-        // This buffer will hold the incoming message
-        beast::flat_buffer buffer;
-
-        // Read a message into our buffer
-        boost::system::error_code readError;
-        auto result = co_await ws.async_read(
-            buffer,
-            boost::asio::redirect_error(boost::asio::use_awaitable, readError));
-        if (readError)
-        {
-            fail(readError, "read");
-            break;
-        }
-
-        boost::json::error_code ec;
-        handleMessage(listener, buffer, ec);
-        if (ec)
-        {
-            // TODO: error handling xd
-        }
+        return fail(ec, "resolve");
     }
+
+    // Set a timeout on the operation
+    beast::get_lowest_layer(this->ws).expires_after(std::chrono::seconds(30));
+
+    // Make the connection on the IP address we get from a lookup
+    beast::get_lowest_layer(this->ws).async_connect(
+        results,
+        beast::bind_front_handler(&Session::onConnect, shared_from_this()));
+}
+
+void Session::onConnect(
+    beast::error_code ec,
+    boost::asio::ip::tcp::resolver::results_type::endpoint_type ep)
+{
+    if (ec)
+    {
+        return fail(ec, "connect");
+    }
+
+    // Set a timeout on the operation
+    beast::get_lowest_layer(this->ws).expires_after(std::chrono::seconds(30));
+
+    // Set SNI Hostname (many hosts need this to handshake successfully)
+    if (!SSL_set_tlsext_host_name(this->ws.next_layer().native_handle(),
+                                  this->host.c_str()))
+    {
+        ec = beast::error_code(static_cast<int>(::ERR_get_error()),
+                               boost::asio::error::get_ssl_category());
+        return fail(ec, "connect");
+    }
+
+    // Update the host_ string. This will provide the value of the
+    // Host HTTP header during the WebSocket handshake.
+    // See https://tools.ietf.org/html/rfc7230#section-5.4
+    host += ':' + std::to_string(ep.port());
+
+    // Perform the SSL handshake
+    this->ws.next_layer().async_handshake(
+        boost::asio::ssl::stream_base::client,
+        beast::bind_front_handler(&Session::onSSLHandshake,
+                                  shared_from_this()));
+}
+
+void Session::onSSLHandshake(beast::error_code ec)
+{
+    if (ec)
+    {
+        return fail(ec, "ssl_handshake");
+    }
+
+    // Turn off the timeout on the tcp_stream, because
+    // the websocket stream has its own timeout system.
+    beast::get_lowest_layer(this->ws).expires_never();
+
+    // Set suggested timeout settings for the websocket
+    this->ws.set_option(
+        websocket::stream_base::timeout::suggested(beast::role_type::client));
+
+    // Set a decorator to change the User-Agent of the handshake
+    this->ws.set_option(websocket::stream_base::decorator(
+        [userAgent{this->userAgent}](websocket::request_type &req) {
+            req.set(http::field::user_agent, userAgent);
+        }));
+
+    // Perform the websocket handshake
+    this->ws.async_handshake(
+        this->host, this->path,
+        beast::bind_front_handler(&Session::onHandshake, shared_from_this()));
+}
+
+void Session::onHandshake(beast::error_code ec)
+{
+    if (ec)
+    {
+        return fail(ec, "handshake");
+    }
+
+    this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
+                                                          shared_from_this()));
+}
+
+void Session::onRead(beast::error_code ec, std::size_t bytes_transferred)
+{
+    boost::ignore_unused(bytes_transferred);
+
+    if (ec)
+    {
+        return fail(ec, "read");
+    }
+
+    auto messageError = handleMessage(this->listener, this->buffer);
+    if (messageError)
+    {
+        return fail(messageError, "handleMessage");
+    }
+
+    this->buffer.clear();
+
+    this->ws.async_read(buffer, beast::bind_front_handler(&Session::onRead,
+                                                          shared_from_this()));
+}
+
+/**
+    this->ws_.async_close(
+        websocket::close_code::normal,
+        beast::bind_front_handler(&Session::onClose, shared_from_this()));
+        */
+void Session::onClose(beast::error_code ec)
+{
+    if (ec)
+    {
+        return fail(ec, "close");
+    }
+
+    // If we get here then the connection is closed gracefully
+
+    // The make_printable() function helps print a ConstBufferSequence
+    std::cout << beast::make_printable(buffer.data()) << std::endl;
 }
 
 }  // namespace eventsub

@@ -5,15 +5,60 @@
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
+#include <boost/json.hpp>
 
 namespace eventsub {
 
 class Listener;
 
-using WebSocketStream = boost::beast::websocket::stream<
-    boost::beast::ssl_stream<boost::beast::tcp_stream>>;
+/**
+ * handleMessage takes the incoming message in the buffer, parses it
+ * as JSON then forwards it to the listener, if applicable.
+ *
+ * This is called from the Session, and is only provided if you are interested
+ * in building your own boost asio framework thing
+ **/
+boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
+                                      const boost::beast::flat_buffer &buffer);
 
-boost::asio::awaitable<void> sessionReader(WebSocketStream &ws,
-                                           std::unique_ptr<Listener> listener);
+// Sends a WebSocket message and prints the response
+class Session : public std::enable_shared_from_this<Session>
+{
+    boost::asio::ip::tcp::resolver resolver_;
+    boost::beast::websocket::stream<
+        boost::beast::ssl_stream<boost::beast::tcp_stream>>
+        ws_;
+    boost::beast::flat_buffer buffer_;
+    std::string host_;
+    std::string port_;
+    std::string path_;
+    std::string userAgent;
+    std::unique_ptr<Listener> listener;
+
+public:
+    // Resolver and socket require an io_context
+    explicit Session(boost::asio::io_context &ioc,
+                     boost::asio::ssl::context &ctx,
+                     std::unique_ptr<Listener> listener);
+
+    // Start the asynchronous operation
+    void run(std::string host, std::string port, std::string path,
+             std::string _userAgent);
+
+    void onResolve(boost::beast::error_code ec,
+                   boost::asio::ip::tcp::resolver::results_type results);
+
+    void onConnect(
+        boost::beast::error_code ec,
+        boost::asio::ip::tcp::resolver::results_type::endpoint_type ep);
+
+    void onSSLHandshake(boost::beast::error_code ec);
+
+    void onHandshake(boost::beast::error_code ec);
+
+    void onRead(boost::beast::error_code ec, std::size_t bytes_transferred);
+
+    void onClose(boost::beast::error_code ec);
+};
 
 }  // namespace eventsub

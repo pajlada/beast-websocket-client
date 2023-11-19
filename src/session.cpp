@@ -16,9 +16,9 @@
 
 #include <array>
 #include <chrono>
-#include <format>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <unordered_map>
 
 namespace beast = boost::beast;
@@ -220,9 +220,11 @@ boost::json::error_code handleMessage(std::unique_ptr<Listener> &listener,
 
     if (handler == MESSAGE_HANDLERS.end())
     {
+        std::stringstream ss;
+        ss << "No message handler found for message type: ";
+        ss << metadata.messageType;
         error::ApplicationErrorCategory errorNoMessageHandlerForMessageType{
-            std::format("No message handler found for message type: {}",
-                        metadata.messageType)};
+            ss.str()};
         return boost::system::error_code{129,
                                          errorNoMessageHandlerForMessageType};
     }

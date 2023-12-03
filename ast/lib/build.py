@@ -5,7 +5,7 @@ import os
 
 import clang.cindex
 
-from .helpers import get_clang_builtin_include_dirs
+from .helpers import get_clang_builtin_include_dirs, get_cmake_include_dirs
 from .struct import Struct
 from .walker import Walker
 
@@ -34,12 +34,17 @@ def build_structs(filename: str, build_commands: Optional[str] = None) -> List[S
     for include_dir in extra_includes:
         parse_args.append(f"-I{include_dir}")
 
-    # Append dir of file
-    file_dir = os.path.dirname(os.path.realpath(filename))
-    parse_args.append(f"-I{file_dir}")
-    # Append project include dir
-    file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "../.."))
-    parse_args.append(f"-I{file_subdir}")
+    for dir in get_cmake_include_dirs():
+        parse_args.append("-I")
+        parse_args.append(dir)
+    else:
+        # Append default dirs
+        # - Append dir of file
+        file_dir = os.path.dirname(os.path.realpath(filename))
+        parse_args.append(f"-I{file_dir}")
+        # - Append project include dir
+        file_subdir = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(filename)), "../.."))
+        parse_args.append(f"-I{file_subdir}")
 
     # TODO: Use build_commands if available
 

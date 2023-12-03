@@ -63,12 +63,10 @@ class Walker:
         return False
 
     def walk(self, node: clang.cindex.Cursor) -> None:
-        node_in_file = bool(node.location.file and os.path.realpath(node.location.file.name) == self.real_filepath)
+        if node.location.file and not clang.cindex.Config().lib.clang_Location_isFromMainFile(node.location):
+            return
 
-        handled = False
-
-        if node_in_file:
-            handled = self.handle_node(node, None)
+        handled = self.handle_node(node, None)
 
         if not handled:
             for child in node.get_children():

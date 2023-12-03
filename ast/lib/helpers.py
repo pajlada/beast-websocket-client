@@ -55,12 +55,15 @@ def temporary_file() -> Generator[Tuple[TextIOWrapper, str], None, None]:
 def get_cmake_include_dirs() -> List[str]:
     cmd = ["cmake", "--build", "build", "-t", "_ast_includes"]
 
-    proc = subprocess.Popen(
-        cmd,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except:
+        return []
 
     stdout, _ = proc.communicate(input=None, timeout=10)
 

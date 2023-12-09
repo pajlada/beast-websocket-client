@@ -52,6 +52,31 @@ def temporary_file() -> Generator[Tuple[TextIOWrapper, str], None, None]:
     log.debug(f"Closed file {path}")
 
 
+def get_cmake_include_dirs() -> List[str]:
+    cmd = ["cmake", "--build", "build", "-t", "_ast_includes"]
+
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except:
+        return []
+
+    stdout, _ = proc.communicate(input=None, timeout=10)
+
+    dirs = []
+    for line in stdout.decode().splitlines():
+        if not line.startswith("@@INCLUDE_DIRS="):
+            continue
+        dirs += line.strip("@@INCLUDE_DIRS=").split(";")
+
+    log.debug(f"Include directories from cmake: {dirs}")
+    return dirs
+
+
 def get_clang_builtin_include_dirs() -> Tuple[List[str], List[str]]:
     quote_includes: List[str] = []
     angle_includes: List[str] = []

@@ -50,7 +50,7 @@
 }
 */
 
-namespace eventsub::payload::channel_chat_message::beta {
+namespace eventsub::payload::channel_chat_message::v1 {
 
 /// json_transform=snake_case
 struct Badge {
@@ -180,4 +180,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
     boost::json::try_value_to_tag<Payload>, const boost::json::value &jvRoot);
 // DESERIALIZATION DEFINITION END
 
-}  // namespace eventsub::payload::channel_chat_message::beta
+}  // namespace eventsub::payload::channel_chat_message::v1

@@ -1,10 +1,10 @@
-#include "eventsub/payloads/channel-chat-message-beta.hpp"
+#include "eventsub/payloads/channel-chat-message-v1.hpp"
 
 #include "eventsub/errors.hpp"
 
 #include <boost/json.hpp>
 
-namespace eventsub::payload::channel_chat_message::beta {
+namespace eventsub::payload::channel_chat_message::v1 {
 
 // DESERIALIZATION IMPLEMENTATION START
 boost::json::result_for<Badge, boost::json::value>::type tag_invoke(
@@ -289,13 +289,13 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         return text.error();
     }
 
-    std::optional<eventsub::payload::channel_chat_message::beta::Cheermote>
+    std::optional<eventsub::payload::channel_chat_message::v1::Cheermote>
         cheermote = std::nullopt;
     const auto *jvcheermote = root.if_contains("cheermote");
     if (jvcheermote != nullptr && !jvcheermote->is_null())
     {
         const auto tcheermote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_message::beta::Cheermote>(
+            eventsub::payload::channel_chat_message::v1::Cheermote>(
             *jvcheermote);
 
         if (tcheermote.has_error())
@@ -305,13 +305,13 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         cheermote = tcheermote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_message::beta::Emote> emote =
+    std::optional<eventsub::payload::channel_chat_message::v1::Emote> emote =
         std::nullopt;
     const auto *jvemote = root.if_contains("emote");
     if (jvemote != nullptr && !jvemote->is_null())
     {
         const auto temote = boost::json::try_value_to<
-            eventsub::payload::channel_chat_message::beta::Emote>(*jvemote);
+            eventsub::payload::channel_chat_message::v1::Emote>(*jvemote);
 
         if (temote.has_error())
         {
@@ -320,13 +320,13 @@ boost::json::result_for<MessageFragment, boost::json::value>::type tag_invoke(
         emote = temote.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_message::beta::Mention>
+    std::optional<eventsub::payload::channel_chat_message::v1::Mention>
         mention = std::nullopt;
     const auto *jvmention = root.if_contains("mention");
     if (jvmention != nullptr && !jvmention->is_null())
     {
         const auto tmention = boost::json::try_value_to<
-            eventsub::payload::channel_chat_message::beta::Mention>(*jvmention);
+            eventsub::payload::channel_chat_message::v1::Mention>(*jvmention);
 
         if (tmention.has_error())
         {
@@ -376,7 +376,7 @@ boost::json::result_for<Message, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_fragments};
     }
     const auto fragments = boost::json::try_value_to<std::vector<
-        eventsub::payload::channel_chat_message::beta::MessageFragment>>(
+        eventsub::payload::channel_chat_message::v1::MessageFragment>>(
         *jvfragments);
     if (fragments.has_error())
     {
@@ -714,7 +714,7 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return boost::system::error_code{129, error_missing_field_badges};
     }
     const auto badges = boost::json::try_value_to<
-        std::vector<eventsub::payload::channel_chat_message::beta::Badge>>(
+        std::vector<eventsub::payload::channel_chat_message::v1::Badge>>(
         *jvbadges);
     if (badges.has_error())
     {
@@ -762,13 +762,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         return message.error();
     }
 
-    std::optional<eventsub::payload::channel_chat_message::beta::Cheer> cheer =
+    std::optional<eventsub::payload::channel_chat_message::v1::Cheer> cheer =
         std::nullopt;
     const auto *jvcheer = root.if_contains("cheer");
     if (jvcheer != nullptr && !jvcheer->is_null())
     {
         const auto tcheer = boost::json::try_value_to<
-            eventsub::payload::channel_chat_message::beta::Cheer>(*jvcheer);
+            eventsub::payload::channel_chat_message::v1::Cheer>(*jvcheer);
 
         if (tcheer.has_error())
         {
@@ -777,13 +777,13 @@ boost::json::result_for<Event, boost::json::value>::type tag_invoke(
         cheer = tcheer.value();
     }
 
-    std::optional<eventsub::payload::channel_chat_message::beta::Reply> reply =
+    std::optional<eventsub::payload::channel_chat_message::v1::Reply> reply =
         std::nullopt;
     const auto *jvreply = root.if_contains("reply");
     if (jvreply != nullptr && !jvreply->is_null())
     {
         const auto treply = boost::json::try_value_to<
-            eventsub::payload::channel_chat_message::beta::Reply>(*jvreply);
+            eventsub::payload::channel_chat_message::v1::Reply>(*jvreply);
 
         if (treply.has_error())
         {
@@ -873,4 +873,4 @@ boost::json::result_for<Payload, boost::json::value>::type tag_invoke(
 }
 // DESERIALIZATION IMPLEMENTATION END
 
-}  // namespace eventsub::payload::channel_chat_message::beta
+}  // namespace eventsub::payload::channel_chat_message::v1

@@ -2,7 +2,7 @@
 
 #include "eventsub/messages/metadata.hpp"
 #include "eventsub/payloads/channel-ban-v1.hpp"
-#include "eventsub/payloads/channel-chat-message-beta.hpp"
+#include "eventsub/payloads/channel-chat-message-v1.hpp"
 #include "eventsub/payloads/channel-chat-notification-v1.hpp"
 #include "eventsub/payloads/channel-update-v1.hpp"
 #include "eventsub/payloads/session-welcome.hpp"
@@ -45,7 +45,7 @@ public:
 
     virtual void onChannelChatMessage(
         messages::Metadata metadata,
-        payload::channel_chat_message::beta::Payload payload) = 0;
+        payload::channel_chat_message::v1::Payload payload) = 0;
 
     // Add your new subscription types above this line
 };

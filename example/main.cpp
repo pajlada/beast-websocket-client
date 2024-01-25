@@ -75,7 +75,7 @@ public:
 
     void onChannelChatMessage(
         messages::Metadata metadata,
-        payload::channel_chat_message::beta::Payload payload) override
+        payload::channel_chat_message::v1::Payload payload) override
     {
         (void)metadata;
         (void)payload;

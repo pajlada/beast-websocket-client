@@ -18,8 +18,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [windows-latest, macos-12, macos-13, ubuntu-20.04, ubuntu-22.04]
         python-version: ["3.11"]
+        compiler: [gcc, clang]
+        exclude:
+          - os: windows-latest
+            compiler: gcc
+          - os: macos-12
+            compiler: gcc
+          - os: macos-13
+            compiler: gcc
 
       fail-fast: false
 

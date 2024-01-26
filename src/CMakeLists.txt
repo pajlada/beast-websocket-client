@@ -18,8 +18,8 @@ set(SOURCE_FILES
     messages/metadata.cpp
     )
 
-message(STATUS "Building ${PROJECT_NAME} as a '${TWITCH_EVENTSUB_LIBRARY_TYPE}' library")
-add_library(${PROJECT_NAME} ${TWITCH_EVENTSUB_LIBRARY_TYPE} ${SOURCE_FILES})
+message(STATUS "Building ${PROJECT_NAME} as a '${TWITCH_EVENTSUB_WS_LIBRARY_TYPE}' library")
+add_library(${PROJECT_NAME} ${TWITCH_EVENTSUB_WS_LIBRARY_TYPE} ${SOURCE_FILES})
 
 # Generate source groups for use in IDEs
 # source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})

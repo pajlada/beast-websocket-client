@@ -1,6 +1,6 @@
-#include "eventsub/messages/metadata.hpp"
+#include "twitch-eventsub-ws/messages/metadata.hpp"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "eventsub/messages/metadata.hpp"
-#include "eventsub/payloads/channel-ban-v1.hpp"
-#include "eventsub/payloads/channel-chat-message-v1.hpp"
-#include "eventsub/payloads/channel-chat-notification-v1.hpp"
-#include "eventsub/payloads/channel-update-v1.hpp"
-#include "eventsub/payloads/session-welcome.hpp"
-#include "eventsub/payloads/stream-offline-v1.hpp"
-#include "eventsub/payloads/stream-online-v1.hpp"
+#include "twitch-eventsub-ws/messages/metadata.hpp"
+#include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-message-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-update-v1.hpp"
+#include "twitch-eventsub-ws/payloads/session-welcome.hpp"
+#include "twitch-eventsub-ws/payloads/stream-offline-v1.hpp"
+#include "twitch-eventsub-ws/payloads/stream-online-v1.hpp"
 
 namespace eventsub {
 

@@ -1,6 +1,6 @@
-#include "eventsub/payloads/stream-online-v1.hpp"
+#include "twitch-eventsub-ws/payloads/stream-online-v1.hpp"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eventsub/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/subscription.hpp"
 
 #include <boost/json.hpp>
 

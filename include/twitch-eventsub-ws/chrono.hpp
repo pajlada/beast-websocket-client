@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eventsub/date.h"
+#include "twitch-eventsub-ws/date.h"
 
 #include <boost/json.hpp>
 

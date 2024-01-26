@@ -1,5 +1,5 @@
-#include "eventsub/listener.hpp"
-#include "eventsub/session.hpp"
+#include "twitch-eventsub-ws/listener.hpp"
+#include "twitch-eventsub-ws/session.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ssl.hpp>

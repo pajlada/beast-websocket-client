@@ -1,6 +1,6 @@
-#include "eventsub/payloads/session-welcome.hpp"
+#include "twitch-eventsub-ws/payloads/session-welcome.hpp"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

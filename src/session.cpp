@@ -1,9 +1,9 @@
-#include "eventsub/session.hpp"
+#include "twitch-eventsub-ws/session.hpp"
 
-#include "eventsub/listener.hpp"
-#include "eventsub/messages/metadata.hpp"
-#include "eventsub/payloads/channel-ban-v1.hpp"
-#include "eventsub/payloads/session-welcome.hpp"
+#include "twitch-eventsub-ws/listener.hpp"
+#include "twitch-eventsub-ws/messages/metadata.hpp"
+#include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
+#include "twitch-eventsub-ws/payloads/session-welcome.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>

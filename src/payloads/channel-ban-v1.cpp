@@ -1,7 +1,7 @@
-#include "eventsub/payloads/channel-ban-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-ban-v1.hpp"
 
-#include "eventsub/chrono.hpp"
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/chrono.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

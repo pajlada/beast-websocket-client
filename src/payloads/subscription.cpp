@@ -1,6 +1,6 @@
-#include "eventsub/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/subscription.hpp"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

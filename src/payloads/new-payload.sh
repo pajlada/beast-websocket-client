@@ -31,10 +31,10 @@ header_file_name="${dashed_subscription_name}-${subscription_version}.hpp"
 source_file_name="${dashed_subscription_name}-${subscription_version}.cpp"
 
 # Write the header file
-cat > "$SCRIPT_DIR/../../include/eventsub/payloads/$header_file_name" << EOF
+cat > "$SCRIPT_DIR/../../include/twitch-eventsub-ws/payloads/$header_file_name" << EOF
 #pragma once
 
-#include "eventsub/payloads/subscription.hpp"
+#include "twitch-eventsub-ws/payloads/subscription.hpp"
 
 #include <boost/json.hpp>
 
@@ -61,9 +61,9 @@ EOF
 
 # Write the source file
 cat > "$SCRIPT_DIR/$source_file_name" << EOF
-#include "eventsub/payloads/$header_file_name"
+#include "twitch-eventsub-ws/payloads/$header_file_name"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 
@@ -76,6 +76,6 @@ namespace eventsub::payload::$underscored_subscription_name::$subscription_versi
 EOF
 
 echo "Steps that are left for you:"
-echo "1. Add a virtual method to the Listener class in include/eventsub/listener.hpp"
+echo "1. Add a virtual method to the Listener class in include/twitch-eventsub-ws/listener.hpp"
 echo "2. Add a handler for this subscription in src/session.cpp's NOTIFICATION_HANDLERS"
 echo "3. Add payloads/${source_file_name} to src/CMakeLists.txt"

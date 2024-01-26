@@ -1,6 +1,6 @@
-#include "eventsub/payloads/channel-chat-notification-v1.hpp"
+#include "twitch-eventsub-ws/payloads/channel-chat-notification-v1.hpp"
 
-#include "eventsub/errors.hpp"
+#include "twitch-eventsub-ws/errors.hpp"
 
 #include <boost/json.hpp>
 

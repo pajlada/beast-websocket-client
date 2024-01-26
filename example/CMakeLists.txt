@@ -1,12 +1,21 @@
-set(EXECUTABLE_PROJECT "${PROJECT_NAME}-example")
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0087 NEW) # evaluates generator expressions in `install(CODE/SCRIPT)`
+cmake_policy(SET CMP0091 NEW) # select MSVC runtime library through `CMAKE_MSVC_RUNTIME_LIBRARY`
 
-add_executable(${EXECUTABLE_PROJECT} main.cpp)
+project(twitch-eventsub-ws-example VERSION 0.1.0)
 
-target_link_libraries(${EXECUTABLE_PROJECT}
+add_executable(${PROJECT_NAME} main.cpp)
+
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/.." twitch-eventsub-ws)
+
+find_library(LIBRT rt)
+find_package(Threads REQUIRED)
+
+target_link_libraries(${PROJECT_NAME}
         PUBLIC
 
         Threads::Threads
-        ${PROJECT_NAME}
+        twitch-eventsub-ws
         )
 
 # Set the output of TARGET to be 
@@ -25,19 +34,17 @@ function(set_target_directory_hierarchy TARGET)
     )
 endfunction()
 
-set_target_directory_hierarchy(${EXECUTABLE_PROJECT})
-
-target_include_directories(${EXECUTABLE_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+set_target_directory_hierarchy(${PROJECT_NAME})
 
 # See https://github.com/boostorg/beast/issues/2661
-target_compile_definitions(${EXECUTABLE_PROJECT} PRIVATE BOOST_ASIO_DISABLE_CONCEPTS)
+target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_DISABLE_CONCEPTS)
 
 if (MSVC)
-    target_compile_options(${EXECUTABLE_PROJECT} PUBLIC /EHsc /bigobj)
+    target_compile_options(${PROJECT_NAME} PUBLIC /EHsc /bigobj)
 endif ()
 
 if (LIBRT)
-    target_link_libraries(${EXECUTABLE_PROJECT}
+    target_link_libraries(${PROJECT_NAME}
         PUBLIC
         ${LIBRT}
         )
